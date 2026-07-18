@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AURA — Англи хэлээ айхгүй ярь</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=Unbounded:wght@400;600;700;900&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="vocab.js"></script>
+<script src="lessons.js"></script>
+<script src="lessons_b1.js"></script>
+<style>
+  :root{
+    --bg:#07060F; --cyan:#3BE8FF; --violet:#9B5CFF; --magenta:#FF54C8; --mint:#5CFFC2;
+    --glass:rgba(255,255,255,.055); --brd:rgba(255,255,255,.14); --txt:#F2F0FF; --dim:#A39FC4; --err:#FF6B7A;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Onest',sans-serif;background:var(--bg);color:var(--txt);overflow-x:hidden;line-height:1.55;min-height:100vh;}
+  .bgmesh{position:fixed;inset:0;z-index:-2;background:var(--bg);overflow:hidden;}
+  .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;animation:drift 20s ease-in-out infinite;}
+  .blob.a{width:500px;height:500px;background:var(--violet);top:-120px;left:-80px;}
+  .blob.b{width:440px;height:440px;background:var(--cyan);top:25%;right:-120px;animation-delay:-7s;}
+  .blob.c{width:400px;height:400px;background:var(--magenta);bottom:-100px;left:30%;animation-delay:-13s;}
+  @keyframes drift{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(40px,-30px) scale(1.1);}66%{transform:translate(-30px,40px) scale(.95);}}
+  ::selection{background:var(--violet);color:#fff;}
+  .display{font-family:'Unbounded',sans-serif;letter-spacing:-.02em;line-height:1.02;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 20px;}
+  a{color:inherit;text-decoration:none;}
+  .glass{background:var(--glass);border:1px solid var(--brd);border-radius:20px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 8px 36px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.1);}
+  .grad{background:linear-gradient(100deg,var(--cyan),var(--violet) 50%,var(--magenta));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+  .btn{font-family:'Onest';font-weight:600;font-size:15px;padding:12px 22px;border-radius:999px;cursor:pointer;border:none;transition:transform .15s,box-shadow .2s;display:inline-block;text-align:center;}
+  .btn.glow{color:#0a0714;background:linear-gradient(100deg,var(--cyan),var(--violet) 60%,var(--magenta));box-shadow:0 0 24px rgba(155,92,255,.5);}
+  .btn.glow:hover{transform:translateY(-2px);}
+  .btn.ghost{background:var(--glass);border:1px solid var(--brd);color:var(--txt);}
+  .btn.ghost:hover{border-color:rgba(255,255,255,.35);}
+  .btn.full{width:100%;}
+  .btn:disabled{opacity:.5;cursor:default;transform:none;}
+
+  .topbar{position:sticky;top:0;z-index:50;padding:14px 0;}
+  .topbar-in{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;}
+  .logo{font-family:'Unbounded';font-weight:900;font-size:20px;display:flex;align-items:center;gap:8px;}
+  .logo .orb{width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fff,var(--violet) 45%,var(--magenta));box-shadow:0 0 14px var(--violet);}
+  .demo-badge{font-size:11px;font-weight:600;color:var(--mint);border:1px solid rgba(92,255,194,.4);background:rgba(92,255,194,.08);padding:5px 11px;border-radius:999px;}
+
+  .view{display:none;} .view.active{display:block;}
+
+  /* LANDING */
+  .hero{padding:56px 0 34px;text-align:center;}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--dim);padding:8px 16px;border-radius:999px;background:var(--glass);border:1px solid var(--brd);margin-bottom:26px;}
+  .pill .d{width:7px;height:7px;border-radius:50%;background:var(--mint);box-shadow:0 0 10px var(--mint);}
+  .hero h1{font-size:clamp(38px,8vw,68px);font-weight:900;margin-bottom:18px;}
+  .hero .sub{font-size:clamp(15px,2.2vw,19px);color:var(--dim);max-width:500px;margin:0 auto 30px;}
+  .aura{position:relative;width:100%;max-width:460px;margin:44px auto 0;height:180px;}
+  .aura,.aura *{pointer-events:none;}
+  .ring{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;border:1px solid var(--brd);}
+  .ring.r1{width:160px;height:160px;} .ring.r2{width:270px;height:270px;opacity:.6;} .ring.r3{width:400px;height:400px;opacity:.3;}
+  .core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,var(--violet) 40%,var(--magenta) 80%);box-shadow:0 0 70px rgba(155,92,255,.8);animation:breathe 4s ease-in-out infinite;}
+  @keyframes breathe{50%{transform:translate(-50%,-50%) scale(1.08);}}
+  .wave{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:5px;}
+  .wave i{width:5px;background:linear-gradient(var(--cyan),var(--violet));border-radius:3px;animation:eq 1.1s ease-in-out infinite;}
+  @keyframes eq{0%,100%{height:9px;}50%{height:40px;}}
+  .feat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;padding:34px 0 50px;}
+  @media(max-width:680px){.feat-row{grid-template-columns:1fr;}}
+  .fcard{padding:22px;}
+  .fcard .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font-size:20px;margin-bottom:14px;background:var(--glass);border:1px solid var(--brd);}
+  .fcard h3{font-size:17px;font-weight:700;margin-bottom:7px;}
+  .fcard p{color:var(--dim);font-size:13px;}
+
+  /* AUTH */
+  .auth-wrap{min-height:calc(100vh - 70px);display:grid;place-items:center;padding:26px 20px;}
+  .auth-card{width:100%;max-width:390px;padding:32px 28px;}
+  .auth-card h2{font-family:'Unbounded';font-weight:700;font-size:24px;margin-bottom:6px;text-align:center;}
+  .auth-card .lead{color:var(--dim);font-size:14px;text-align:center;margin-bottom:24px;}
+  .tabs{display:flex;background:rgba(255,255,255,.05);border-radius:999px;padding:4px;margin-bottom:22px;}
+  .tabs button{flex:1;padding:10px;border:none;background:transparent;color:var(--dim);font-family:'Onest';font-weight:600;font-size:14px;border-radius:999px;cursor:pointer;transition:.2s;}
+  .tabs button.on{background:linear-gradient(100deg,var(--violet),var(--magenta));color:#fff;}
+  .field{margin-bottom:15px;}
+  .field label{display:block;font-size:13px;color:var(--dim);margin-bottom:6px;font-weight:500;}
+  .field input{width:100%;padding:13px 15px;border-radius:13px;border:1px solid var(--brd);background:rgba(255,255,255,.04);color:var(--txt);font-family:'Onest';font-size:15px;outline:none;transition:border .2s;}
+  .field input:focus{border-color:var(--violet);}
+  .hide{display:none;}
+  .msg{font-size:13px;text-align:center;margin-top:13px;min-height:18px;}
+  .msg.error{color:var(--err);} .msg.ok{color:var(--mint);}
+
+  /* APP SHELL */
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:16px 0;}
+  .appbar .who{font-size:14px;color:var(--dim);}
+  .app-tabs{display:flex;flex-wrap:wrap;gap:6px;padding:6px;margin:6px 0 22px;}
+  .app-tabs button{flex:1 1 28%;min-width:84px;padding:11px 3px;border:none;border-radius:14px;background:transparent;color:var(--dim);font-family:'Onest';font-weight:600;font-size:13px;cursor:pointer;transition:.2s;}
+  .app-tabs button.on{background:var(--glass);border:1px solid var(--brd);color:var(--txt);}
+  .pane{display:none;} .pane.on{display:block;}
+
+  /* HOME */
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
+  .stat-c{padding:18px 12px;text-align:center;}
+  .stat-c .n{font-family:'Unbounded';font-weight:900;font-size:28px;}
+  .stat-c .n.c{color:var(--cyan);} .stat-c .n.m{color:var(--magenta);} .stat-c .n.g{color:var(--mint);}
+  .stat-c .l{color:var(--dim);font-size:12px;margin-top:2px;}
+  .sect-h{font-family:'Unbounded';font-weight:600;font-size:17px;margin:22px 0 12px;}
+
+  /* level switch */
+  .levels{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+  .levels button{flex:1;min-width:150px;padding:15px;border:1px solid var(--brd);border-radius:16px;background:var(--glass);color:var(--txt);font-family:'Onest';cursor:pointer;text-align:left;transition:.18s;}
+  .levels button.on{border-color:var(--violet);box-shadow:0 0 24px rgba(155,92,255,.25);background:linear-gradient(120deg,rgba(155,92,255,.15),rgba(59,232,255,.06));}
+  .levels button .t{font-weight:700;font-size:15px;}
+  .levels button .s{color:var(--dim);font-size:12px;margin-top:2px;}
+
+  /* lesson list */
+  .llist{display:flex;flex-direction:column;gap:11px;padding-bottom:30px;}
+  .lcard{padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .16s,box-shadow .16s;}
+  .lcard:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(155,92,255,.2);}
+  .lcard .no{font-family:'Unbounded';font-weight:900;font-size:22px;color:var(--violet);min-width:36px;}
+  .lcard.done .no{color:var(--mint);}
+  .lcard .body h3{font-size:16px;font-weight:700;}
+  .lcard .body p{color:var(--dim);font-size:13px;margin-top:2px;}
+  .lcard .lvl{margin-left:auto;font-size:11px;font-weight:600;color:var(--cyan);border:1px solid rgba(59,232,255,.3);padding:3px 10px;border-radius:999px;white-space:nowrap;}
+
+  /* lesson detail */
+  .dhead{display:flex;align-items:center;gap:12px;padding:18px 0 10px;}
+  .dhead .back{background:none;border:none;color:var(--dim);font-family:'Onest';font-weight:600;font-size:14px;cursor:pointer;}
+  .dhead h2{font-family:'Unbounded';font-weight:700;font-size:19px;}
+  .subtabs{display:flex;gap:6px;padding:5px;margin-bottom:16px;overflow-x:auto;}
+  .subtabs button{flex:1;min-width:74px;padding:10px 6px;border:none;border-radius:12px;background:transparent;color:var(--dim);font-family:'Onest';font-weight:600;font-size:13px;cursor:pointer;transition:.2s;white-space:nowrap;}
+  .subtabs button.on{background:var(--glass);border:1px solid var(--brd);color:var(--txt);}
+  .sec{display:none;} .sec.on{display:block;animation:fade .3s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}}
+
+  .rule{padding:22px;margin-bottom:14px;}
+  .rule h3{font-size:16px;font-weight:700;margin-bottom:11px;color:var(--cyan);}
+  .rule p{font-size:15px;margin-bottom:11px;}
+  .rule .tag{display:inline-block;background:rgba(155,92,255,.15);border:1px solid rgba(155,92,255,.35);border-radius:8px;padding:3px 9px;font-size:13px;font-weight:600;margin:2px 3px;}
+
+  .phrase{padding:15px 17px;margin-bottom:10px;display:flex;align-items:center;gap:13px;}
+  .phrase .txt{flex:1;}
+  .phrase .en{font-size:17px;font-weight:600;}
+  .phrase .pron{color:var(--cyan);font-size:14px;margin-top:2px;}
+  .phrase .pron::before{content:"🗣 ";}
+  .phrase .mn{color:var(--dim);font-size:14px;margin-top:3px;}
+  .speak{width:44px;height:44px;min-width:44px;border-radius:12px;border:1px solid var(--brd);background:rgba(255,255,255,.05);color:var(--txt);font-size:19px;cursor:pointer;transition:.15s;display:grid;place-items:center;}
+  .speak:hover{background:linear-gradient(100deg,var(--violet),var(--magenta));border-color:transparent;}
+  .speak.playing{background:linear-gradient(100deg,var(--cyan),var(--violet));border-color:transparent;}
+  .pron-note{font-size:12px;color:var(--dim);text-align:center;padding:6px 0 14px;}
+
+  .ex{padding:19px;margin-bottom:13px;}
+  .ex .q{font-size:15px;margin-bottom:6px;color:var(--dim);}
+  .ex .sent{font-size:18px;font-weight:600;margin-bottom:13px;}
+  .ex .sent .blank{color:var(--magenta);border-bottom:2px dashed var(--magenta);padding:0 18px;}
+  .opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{text-align:left;padding:12px 15px;border-radius:12px;border:1px solid var(--brd);background:rgba(255,255,255,.04);color:var(--txt);font-family:'Onest';font-size:15px;cursor:pointer;transition:.15s;}
+  .opt:hover{border-color:var(--violet);}
+  .opt.correct{background:rgba(92,255,194,.15);border-color:var(--mint);color:var(--mint);}
+  .opt.wrong{background:rgba(255,107,122,.12);border-color:var(--err);color:var(--err);}
+  .opt:disabled{cursor:default;}
+  .exfix{margin-top:12px;font-size:13px;padding:11px 13px;border-radius:10px;background:rgba(59,232,255,.1);border:1px solid rgba(59,232,255,.25);color:var(--cyan);display:none;}
+  .exfix.show{display:block;}
+
+  .chat{padding:20px;min-height:300px;}
+  .m{padding:11px 14px;border-radius:15px;margin-bottom:10px;font-size:15px;max-width:86%;animation:fade .25s ease;}
+  .m.bot{background:rgba(255,255,255,.07);border:1px solid var(--brd);}
+  .m.me{background:linear-gradient(100deg,var(--violet),var(--magenta));color:#fff;margin-left:auto;}
+  .m .who{display:block;font-size:11px;font-weight:700;text-transform:uppercase;opacity:.65;margin-bottom:3px;}
+  .m .pr{display:block;font-size:12px;color:var(--cyan);margin-top:4px;}
+  .m .mn{display:block;font-size:12px;opacity:.7;font-style:italic;margin-top:2px;}
+  .choices{display:flex;flex-direction:column;gap:9px;margin-top:6px;}
+  .choice{text-align:left;padding:12px 15px;border-radius:13px;border:1px solid var(--brd);background:rgba(255,255,255,.04);color:var(--txt);font-family:'Onest';font-size:14px;cursor:pointer;transition:.15s;}
+  .choice:hover{border-color:var(--violet);background:rgba(155,92,255,.12);}
+  .chat-input{display:flex;gap:10px;margin-top:12px;}
+  .chat-input input{flex:1;padding:13px 15px;border-radius:14px;border:1px solid var(--brd);background:rgba(255,255,255,.04);color:var(--txt);font-family:'Onest';font-size:15px;outline:none;}
+  .chat-input input:focus{border-color:var(--violet);}
+  .done-card{text-align:center;padding:14px;}
+  .done-card .big{font-family:'Unbounded';font-weight:900;font-size:34px;}
+
+  /* profile */
+  .prof-head{text-align:center;padding:14px 0 22px;}
+  .prof-av{width:72px;height:72px;border-radius:50%;margin:0 auto 12px;background:radial-gradient(circle at 35% 30%,#fff,var(--violet) 45%,var(--magenta));box-shadow:0 0 38px rgba(155,92,255,.6);}
+  .prof-head h3{font-family:'Unbounded';font-weight:700;font-size:21px;}
+  .prof-head p{color:var(--dim);font-size:14px;}
+  .prof-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0;}
+  .ps{padding:16px 10px;text-align:center;}
+  .ps .n{font-family:'Unbounded';font-weight:900;font-size:24px;color:var(--cyan);}
+  .ps .l{font-size:12px;color:var(--dim);margin-top:3px;}
+
+  .vsearch{width:100%;padding:12px 15px;border-radius:14px;border:1px solid var(--brd);background:rgba(255,255,255,.04);color:var(--txt);font-family:'Onest';font-size:15px;outline:none;margin-bottom:14px;}
+  .vsearch:focus{border-color:var(--violet);}
+  .chips{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+  .chip{padding:8px 16px;border-radius:999px;border:1px solid var(--brd);background:var(--glass);color:var(--dim);font-family:'Onest';font-weight:600;font-size:13px;cursor:pointer;transition:.15s;}
+  .chip.on{border-color:var(--violet);color:var(--txt);background:linear-gradient(120deg,rgba(155,92,255,.2),rgba(59,232,255,.06));}
+  .wcard{padding:15px 17px;margin-bottom:10px;display:flex;align-items:flex-start;gap:13px;}
+  .wcard .ic{font-size:30px;line-height:1;}
+  .wcard .txt{flex:1;}
+  .wcard .en{font-size:17px;font-weight:700;}
+  .wcard .pron{color:var(--cyan);font-size:13px;margin-top:2px;}
+  .wcard .pron::before{content:"🗣 ";}
+  .wcard .mn{color:var(--txt);font-size:14px;margin-top:2px;}
+  .wcard .ex{color:var(--dim);font-size:13px;margin-top:7px;border-left:2px solid var(--brd);padding-left:9px;line-height:1.5;}
+  .vsec{display:none;} .vsec.on{display:block;animation:fade .3s ease;}
+  .flash-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:10px 0;}
+  .flash{width:100%;max-width:420px;height:230px;cursor:pointer;perspective:1000px;}
+  .flash-in{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;}
+  .flash.flip .flash-in{transform:rotateY(180deg);}
+  .flash-face{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center;}
+  .flash-back{transform:rotateY(180deg);}
+  .flash-face .ic{font-size:52px;}
+  .flash-face .big{font-size:28px;font-weight:800;font-family:'Unbounded';}
+  .flash-face .fpron{color:var(--cyan);font-size:15px;}
+  .flash-face .fmn{font-size:24px;font-weight:700;}
+  .flash-nav{display:flex;gap:10px;align-items:center;}
+  .flash-nav .btn{padding:10px 18px;}
+  .flash-count{color:var(--dim);font-size:13px;min-width:56px;text-align:center;}
+  .quiz-progress{color:var(--dim);font-size:13px;text-align:center;margin-bottom:12px;}
+  .game-list{display:flex;flex-direction:column;gap:12px;}
+  .gcard{padding:20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:transform .16s,box-shadow .16s;}
+  .gcard:hover{transform:translateY(-3px);box-shadow:0 14px 40px rgba(155,92,255,.22);}
+  .gcard .gic{font-size:34px;line-height:1;}
+  .gcard h3{font-size:17px;font-weight:700;}
+  .gcard p{color:var(--dim);font-size:13px;margin-top:2px;}
+  .ghead{display:flex;align-items:center;gap:12px;padding:18px 0 12px;}
+  .ghead .back{background:none;border:none;color:var(--dim);font-family:'Onest';font-weight:600;font-size:14px;cursor:pointer;}
+  .ghead h2{font-family:'Unbounded';font-weight:700;font-size:19px;}
+  .game-status{text-align:center;color:var(--dim);font-size:13px;margin-top:16px;}
+  .match-grid{display:flex;gap:12px;}
+  .match-col{flex:1;display:flex;flex-direction:column;gap:9px;}
+  .mtile{padding:14px 10px;border-radius:13px;border:1px solid var(--brd);background:rgba(255,255,255,.04);color:var(--txt);font-family:'Onest';font-size:14px;font-weight:600;cursor:pointer;transition:.15s;}
+  .mtile.sel{border-color:var(--cyan);background:rgba(59,232,255,.14);}
+  .mtile.done{opacity:.22;pointer-events:none;border-color:var(--mint);}
+  .mtile.wrong{border-color:var(--err);background:rgba(255,107,122,.16);}
+  .speed-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:15px;}
+  .speed-combo{color:var(--magenta);font-weight:700;}
+  .timebar{height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:16px;}
+  .timebar-fill{height:100%;width:100%;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--magenta));transition:width 1s linear;}
+  .sq{padding:24px 20px;text-align:center;}
+  .sq-word{font-size:24px;font-weight:700;margin-bottom:18px;}
+  .mem-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+  .memcard{min-height:74px;border-radius:13px;border:1px solid var(--brd);background:rgba(255,255,255,.04);color:var(--txt);font-family:'Onest';font-size:12.5px;font-weight:600;cursor:pointer;display:grid;place-items:center;padding:6px;transition:.15s;text-align:center;word-break:break-word;}
+  .memcard.open{border-color:var(--cyan);background:rgba(59,232,255,.12);}
+  .memcard.done{opacity:.22;border-color:var(--mint);pointer-events:none;}
+  .home-banner{display:flex;align-items:center;gap:6px;padding:15px 18px;margin-bottom:18px;cursor:pointer;font-size:15px;font-weight:600;background:linear-gradient(100deg,rgba(155,92,255,.18),rgba(255,84,200,.12));border:1px solid rgba(155,92,255,.4);transition:.16s;}
+  .home-banner:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(155,92,255,.25);}
+  .home-banner span{margin-left:auto;color:var(--magenta);font-size:18px;}
+  .ref-card{padding:22px;margin-bottom:16px;}
+  .ref-title{font-family:'Unbounded';font-weight:700;font-size:18px;margin-bottom:4px;}
+  .ref-sub{color:var(--dim);font-size:13px;margin-bottom:16px;}
+  .ref-balance{display:flex;gap:12px;margin-bottom:16px;}
+  .ref-balance>div{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--brd);border-radius:14px;padding:14px 10px;text-align:center;}
+  .rb-n{font-family:'Unbounded';font-weight:900;font-size:22px;color:var(--mint);}
+  .rb-l{color:var(--dim);font-size:11px;margin-top:3px;}
+  .ref-code{display:flex;gap:10px;align-items:center;background:rgba(255,255,255,.05);border:1px dashed var(--brd);border-radius:14px;padding:10px 10px 10px 14px;margin-bottom:14px;}
+  .ref-code>span{font-family:'Unbounded';font-weight:700;font-size:17px;letter-spacing:1px;flex:1;}
+  .ref-code .btn{padding:9px 16px;font-size:13px;}
+  .ref-progress{margin-bottom:14px;}
+  .rp-bar{height:8px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin-bottom:7px;}
+  .rp-fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--magenta));transition:width .4s;}
+  .rp-txt{color:var(--dim);font-size:12px;text-align:center;}
+  .ref-demo{margin-top:14px;text-align:center;font-size:12px;color:var(--dim);}
+  .ref-sim{background:none;border:1px solid var(--brd);color:var(--cyan);border-radius:999px;padding:5px 12px;font-family:'Onest';font-size:12px;cursor:pointer;margin-left:4px;}
+  .wd-field{margin-bottom:12px;}
+  .wd-field label{display:block;font-size:13px;color:var(--dim);margin-bottom:5px;}
+  .wd-field input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--brd);background:rgba(255,255,255,.04);color:var(--txt);font-family:'Onest';font-size:15px;outline:none;}
+  .wd-field input:focus{border-color:var(--violet);}
+  .ref-actions{display:flex;gap:10px;}
+  .ref-actions .btn{flex:1;padding:12px 8px;font-size:14px;}
+  .price-row{display:flex;justify-content:space-between;font-size:15px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07);}
+  .price-row.total{border-bottom:none;font-weight:700;font-size:17px;padding-top:12px;}
+  .pay-box{background:rgba(255,255,255,.05);border:1px solid var(--brd);border-radius:14px;padding:14px 16px;margin:14px 0;font-size:14px;line-height:2;}
+  .alpha-intro{padding:18px 20px;margin-bottom:16px;font-size:14px;color:var(--dim);line-height:1.6;}
+  .alpha-intro b{color:var(--txt);}
+  .alpha-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding-bottom:22px;}
+  .acard{aspect-ratio:1;border-radius:16px;border:1px solid var(--brd);background:var(--glass);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:.15s;}
+  .acard:hover{transform:translateY(-3px);border-color:var(--violet);box-shadow:0 10px 26px rgba(155,92,255,.22);}
+  .acard .al{font-family:'Unbounded';font-weight:800;font-size:24px;}
+  .acard .an{font-size:11px;color:var(--cyan);}
+  .acard.vow .al{color:var(--magenta);}
+  .al-hero{text-align:center;padding:24px;margin-bottom:16px;}
+  .al-big{font-family:'Unbounded';font-weight:900;font-size:60px;line-height:1;}
+  .al-big.vow{color:var(--magenta);}
+  .al-name{margin-top:12px;font-size:16px;}
+  .al-name b{color:var(--cyan);}
+  .al-tag{display:inline-block;margin-top:12px;font-size:12px;font-weight:600;padding:4px 14px;border-radius:999px;border:1px solid var(--brd);color:var(--dim);}
+  .al-sec-h{font-family:'Unbounded';font-weight:600;font-size:15px;margin:18px 0 10px;}
+  .al-sound{padding:14px 16px;margin-bottom:10px;}
+  .al-sound .ss{font-size:16px;font-weight:700;}
+  .al-sound .ss b{color:var(--cyan);}
+  .al-sound .ex{color:var(--dim);font-size:14px;margin-top:4px;}
+  .al-note{padding:13px 15px;border-radius:12px;background:rgba(59,232,255,.1);border:1px solid rgba(59,232,255,.25);color:var(--cyan);font-size:13px;margin-bottom:4px;line-height:1.6;}
+  .al-nav{display:flex;gap:10px;margin-top:18px;}
+  .al-nav .btn{flex:1;}
+  .ad-letter{font-family:'Unbounded';font-weight:900;font-size:52px;line-height:1;display:inline-block;}
+  .ad-letter.vow{color:var(--magenta);}
+  .lcard.locked{opacity:.55;}
+  .lcard.locked:hover{transform:none;box-shadow:none;}
+  .practice-card{padding:18px;margin-bottom:14px;display:flex;align-items:center;gap:14px;cursor:pointer;border:1px solid rgba(59,232,255,.4);background:linear-gradient(100deg,rgba(59,232,255,.14),rgba(155,92,255,.1));transition:.16s;}
+  .practice-card:hover{transform:translateY(-3px);box-shadow:0 12px 34px rgba(59,232,255,.2);}
+  .practice-card .gic{font-size:30px;line-height:1;}
+  .practice-card h3{font-size:16px;font-weight:700;}
+  .practice-card p{color:var(--dim);font-size:12.5px;margin-top:2px;}
+  .mywords-card{border-color:rgba(255,196,0,.4)!important;}
+  .tw{cursor:pointer;border-bottom:1px dotted rgba(59,232,255,.5);transition:.12s;}
+  .tw:hover{color:var(--cyan);border-bottom-color:var(--cyan);}
+  .gap{color:var(--cyan);letter-spacing:2px;}
+  .wc-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(7,6,15,.78);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:22px;}
+  .wc-card{width:100%;max-width:340px;padding:24px;text-align:center;}
+  .wc-word{font-family:'Unbounded';font-weight:800;font-size:26px;margin-bottom:8px;word-break:break-word;}
+  .wc-pron{color:var(--cyan);font-size:16px;margin-bottom:6px;}
+  .wc-mn{font-size:17px;margin-bottom:14px;}
+  .wc-base{color:var(--dim);font-size:12px;margin-bottom:12px;line-height:1.6;}
+  .footnote{text-align:center;color:var(--dim);font-size:12px;padding:24px 0;}
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:3px;}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;}}
+</style>
+</head>
+<body>
+  <div id="errBanner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:999;background:#b3172a;color:#fff;font:13px Onest,sans-serif;padding:8px 12px;text-align:center"></div>
+  <div class="bgmesh"><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div></div>
+
+  <div class="topbar wrap">
+    <div class="topbar-in glass">
+      <div class="logo"><span class="orb"></span>AURA</div>
+      <div><span class="demo-badge" id="demoBadge" style="display:none">DEMO горим</span></div>
+    </div>
+  </div>
+
+  <!-- LANDING -->
+  <section class="view active" id="v-landing">
+    <div class="hero wrap">
+      <span class="pill"><span class="d"></span>42 хичээл · дуудлага монголоор · AI ярилцлага</span>
+      <h1 class="display">Англи хэлээ<br /><span class="grad">айхгүй ярь.</span></h1>
+      <p class="sub">Дүрэм цээжлэх биш — итгэлтэй ярих. Монгол дуудлагыг уншаад, жинхэнэ авиаг сонсоод, Ruby-тэй ярь.</p>
+      <button class="btn glow" style="position:relative;z-index:5" onclick="go('auth','signup')">Үнэгүй эхлэх →</button>
+      <div class="aura">
+        <div class="ring r3"></div><div class="ring r2"></div><div class="ring r1"></div>
+        <div class="core"></div><div class="wave" id="wave"></div>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="feat-row">
+        <div class="glass fcard"><div class="ic">📚</div><h3>3 түвшин</h3><p>42 хичээл: дүрэм, дуудлага, дасгал.</p></div>
+        <div class="glass fcard"><div class="ic">🔊</div><h3>Дуудлага сонс</h3><p>Кириллээр уншаад, жинхэнэ авиаг товшоод сонс.</p></div>
+        <div class="glass fcard"><div class="ic">💬</div><h3>Ruby-тэй ярь</h3><p>AI багштай чөлөөтэй ярианы дасгал.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTH -->
+  <section class="view" id="v-auth">
+    <div class="auth-wrap">
+      <div class="glass auth-card">
+        <h2 id="authTitle">Тавтай морил</h2>
+        <p class="lead" id="authLead">Англи ярианы аяллаа эхлүүлье</p>
+        <div class="tabs">
+          <button id="tabLogin" class="on" onclick="setAuthMode('login')">Нэвтрэх</button>
+          <button id="tabSignup" onclick="setAuthMode('signup')">Бүртгүүлэх</button>
+        </div>
+        <div class="field hide" id="nameField"><label>Нэр</label><input id="inName" type="text" placeholder="Таны нэр" autocomplete="name" /></div>
+        <div class="field"><label>И-мэйл</label><input id="inEmail" type="email" placeholder="you@email.com" autocomplete="email" /></div>
+        <div class="field"><label>Нууц үг</label><input id="inPass" type="password" placeholder="••••••••" autocomplete="current-password" /></div>
+        <button class="btn glow full" id="authBtn" onclick="submitAuth()">Нэвтрэх</button>
+        <div class="msg" id="authMsg"></div>
+        <p class="lead" style="margin:16px 0 0;font-size:12px;cursor:pointer" onclick="go('landing')">← Нүүр хуудас</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section class="view" id="v-app">
+    <div class="wrap">
+      <div class="appbar">
+        <div class="who">Сайн уу, <b id="hiName">анд</b> 👋</div>
+        <button class="btn ghost" style="padding:9px 18px;font-size:13px" onclick="logout()">Гарах</button>
+      </div>
+      <div class="glass app-tabs">
+        <button class="on" data-tab="home" onclick="setTab('home')">Нүүр</button>
+        <button data-tab="alpha" onclick="setTab('alpha')">Үсэг</button>
+        <button data-tab="lessons" onclick="setTab('lessons')">Хичээл</button>
+        <button data-tab="vocab" onclick="setTab('vocab')">Үг</button>
+        <button data-tab="games" onclick="setTab('games')">Тоглоом</button>
+        <button data-tab="chat" onclick="setTab('chat')">Яриа</button>
+        <button data-tab="profile" onclick="setTab('profile')">Профайл</button>
+      </div>
+
+      <!-- HOME -->
+      <div class="pane on" id="p-home">
+        <div class="stat-grid">
+          <div class="glass stat-c"><div class="n c" id="homeXp">0</div><div class="l">XP</div></div>
+          <div class="glass stat-c"><div class="n m" id="homeStreak">0</div><div class="l">Цуваа 🔥</div></div>
+          <div class="glass stat-c"><div class="n g" id="homeDone">0</div><div class="l">Дуусгасан</div></div>
+        </div>
+        <div class="glass home-banner" onclick="setTab('profile')">💰 Найзаа урьж <b style="margin:0 4px">2,500₮</b> ол <span>→</span></div>
+        <div class="sect-h">Түвшингээ сонго</div>
+        <div class="levels" id="homeLevels"></div>
+        <button class="btn glow full" onclick="setTab('lessons')">Хичээл рүү →</button>
+      </div>
+
+      <!-- ALPHABET -->
+      <div class="pane" id="p-alpha">
+        <div class="glass alpha-intro">
+          Англи хэлэнд <b>26 үсэг</b> бий. Эдгээрийн <b>5 нь эгшиг</b> (A, E, I, O, U) — үлдсэн нь гийгүүлэгч.<br><br>
+          Үсэг бүр <b>2 зүйлтэй</b>:<br>
+          • <b>Нэр</b> — цагаан толгой уншихад хэлдэг (жишээ: B = «бий»)<br>
+          • <b>Авиа</b> — үгэн дотор гарах дуу (жишээ: B = «б»)<br><br>
+          Заримдаа нэг үсэг <b>өөр өөр авиа</b> гаргадаг (C = «к» эсвэл «с»). Тиймээс доор жишээ үгтэй нь тайлбарлав. Үсэг дээр дарж, 🔊 дарж жинхэнэ дуудлагыг сонс.
+        </div>
+        <div class="alpha-grid" id="alphaGrid"></div>
+        <button class="btn glow full" style="margin-bottom:24px" onclick="startAlphaDrill()">🎯 Үсгийн дасгал хийх</button>
+      </div>
+
+      <!-- LESSONS -->
+      <div class="pane" id="p-lessons">
+        <div class="levels" id="lessonLevels"></div>
+        <div class="llist" id="llist"></div>
+      </div>
+
+      <!-- VOCABULARY -->
+      <div class="pane" id="p-vocab">
+        <input id="vocabSearch" class="vsearch" type="text" placeholder="🔍 Үг хайх (англи эсвэл монгол)..." oninput="renderVocabList()" />
+        <div class="chips" id="vocabChips"></div>
+        <div class="llist" id="vlist"></div>
+      </div>
+
+      <!-- GAMES -->
+      <div class="pane" id="p-games">
+        <div class="chips" id="gameChips"></div>
+        <div class="game-list">
+          <div class="glass gcard" onclick="startGame('match')"><div class="gic">🔗</div><div><h3>Хос тааруул</h3><p>Англи ⟷ монгол үгсийг хосоор нь холбо</p></div></div>
+          <div class="glass gcard" onclick="startGame('speed')"><div class="gic">⚡</div><div><h3>Хурдны тэмцээн</h3><p>45 секундэд аль болох олон үг тани</p></div></div>
+          <div class="glass gcard" onclick="startGame('memory')"><div class="gic">🃏</div><div><h3>Санах ойн карт</h3><p>Картуудыг эргүүлж хосыг нь ол</p></div></div>
+        </div>
+      </div>
+
+      <!-- FREE CHAT -->
+      <div class="pane" id="p-chat">
+        <div class="glass chat" style="min-height:auto"><div id="freeMsgs"></div></div>
+        <div class="chat-input">
+          <input id="freeInput" type="text" placeholder="Англиар бич..." onkeydown="if(event.key==='Enter')sendFree()" />
+          <button class="btn glow" onclick="sendFree()">Илгээх</button>
+        </div>
+        <p class="pron-note">Ruby-тэй чөлөөтэй ярь — англиар бич, тэр хариулж, зөөлөн засаж, монголоор тусална.</p>
+      </div>
+
+      <!-- PROFILE -->
+      <div class="pane" id="p-profile">
+        <div id="refSection"></div>
+        <div class="glass" style="padding:24px">
+          <div class="prof-head"><div class="prof-av"></div><h3 id="profName">Хэрэглэгч</h3><p id="profEmail">—</p></div>
+          <div class="prof-stats">
+            <div class="glass ps"><div class="n" id="profXp">0</div><div class="l">XP</div></div>
+            <div class="glass ps"><div class="n" id="profStreak">0</div><div class="l">Цуваа</div></div>
+            <div class="glass ps"><div class="n" id="profDone">0</div><div class="l">Хичээл</div></div>
+          </div>
+          <button class="btn ghost full" onclick="logout()">Гарах</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LESSON DETAIL -->
+  <section class="view" id="v-lesson">
+    <div class="wrap">
+      <div class="dhead"><button class="back" onclick="closeLesson()">← Хичээлүүд</button><h2 id="dTitle"></h2></div>
+      <div class="glass subtabs">
+        <button data-s="rule" class="on" onclick="setSec('rule')">Дүрэм</button>
+        <button data-s="pron" onclick="setSec('pron')">Дуудлага</button>
+        <button data-s="ex" onclick="setSec('ex')">Дасгал</button>
+        <button data-s="speak" onclick="setSec('speak')">Ярих</button>
+      </div>
+      <div class="sec on" id="s-rule"></div>
+      <div class="sec" id="s-pron"></div>
+      <div class="sec" id="s-ex"></div>
+      <div class="sec" id="s-speak"><div class="glass chat"><div id="chatMsgs"></div><div id="chatInteract"></div></div></div>
+    </div>
+  </section>
+
+  <!-- VOCAB PACK DETAIL -->
+  <section class="view" id="v-vpack">
+    <div class="wrap">
+      <div class="dhead"><button class="back" onclick="closePack()">← Үгсийн сан</button><h2 id="vpTitle"></h2></div>
+      <div class="glass subtabs">
+        <button data-vs="words" class="on" onclick="setVSec('words')">Үгс</button>
+        <button data-vs="cards" onclick="setVSec('cards')">Флэшкарт</button>
+        <button data-vs="quiz" onclick="setVSec('quiz')">Дасгал</button>
+      </div>
+      <div class="vsec on" id="vs-words"></div>
+      <div class="vsec" id="vs-cards"></div>
+      <div class="vsec" id="vs-quiz"></div>
+    </div>
+  </section>
+
+  <!-- GAME VIEW -->
+  <section class="view" id="v-game">
+    <div class="wrap">
+      <div class="ghead"><button class="back" onclick="backToGames()">← Тоглоомууд</button><h2 id="gameTitle"></h2></div>
+      <div id="gameBody"></div>
+    </div>
+  </section>
+
+  <!-- A1 PRACTICE -->
+  <section class="view" id="v-practice">
+    <div class="wrap">
+      <div class="dhead"><button class="back" onclick="closePractice()">← Хичээл</button><h2 id="prTitle"></h2></div>
+      <div id="prBody"></div>
+    </div>
+  </section>
+
+  <!-- LETTER DRILL -->
+  <section class="view" id="v-aldrill">
+    <div class="wrap">
+      <div class="dhead"><button class="back" onclick="closeAlphaDrill()">← Цагаан толгой</button><h2 id="adTitle"></h2></div>
+      <div id="adBody"></div>
+    </div>
+  </section>
+
+  <!-- LETTER DETAIL -->
+  <section class="view" id="v-aldetail">
+    <div class="wrap">
+      <div class="dhead"><button class="back" onclick="closeLetter()">← Цагаан толгой</button><h2 id="alTitle"></h2></div>
+      <div id="alBody"></div>
+    </div>
+  </section>
+
+  <div class="footnote">© 2026 AURA · Дуудлага ойролцоо — 🔊 дарж жинхэнэ авиаг сонс</div>
+
+<script>
+window.addEventListener("error", function(ev){ try{ var b=document.getElementById("errBanner"); if(b){ b.style.display="block"; b.textContent="⚠️ "+(ev.message||"Алдаа"); } }catch(_){}});
+// ============================================================
+//  ХИЧЭЭЛИЙН ӨГӨГДӨЛ (Анхан + Дунд + Гүнзгий) — доор автоматаар оруулсан
+// ============================================================
+const XP_PER_LESSON = 20;
+const XP_PER_PACK = 15;
+
+// ============================================================
+//  SUPABASE ТОХИРГОО (Dashboard → Settings → API хэсгээс авна)
+// ============================================================
+const SUPABASE_URL      = "https://cxspmcpglndtyyhehima.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN4c3BtY3BnbG5kdHl5aGVoaW1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwODY2NTYsImV4cCI6MjA5OTY2MjY1Nn0.3zPwSXbc5dQoZxBBGp13r2jUpxwn7vqt4eFFCgLaVfE";
+const RUBY_FUNCTION     = "ruby";                // Edge Function-ий нэр
+
+let demoMode = SUPABASE_URL.includes("YOUR_") || SUPABASE_ANON_KEY.includes("YOUR_");
+let sb=null;
+try{
+  if(!demoMode && window.supabase && window.supabase.createClient){
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } else if(!demoMode){ demoMode=true; console.warn("supabase library not loaded"); }
+}catch(e){ demoMode=true; console.warn("supabase init failed", e); }
+if(demoMode) document.getElementById('demoBadge').style.display='inline-block';
+
+async function saveProfile(){
+  const p=state.profile; if(demoMode||!sb||!state.user) return;
+  try{ await sb.auth.updateUser({ data:{ full_name:p.full_name, xp:p.xp, streak:p.streak, last_active:p.last_active, done:p.done, completed:p.completed, referral_code:p.referral_code||null, ref_friends:p.ref_friends||0, reward_balance:(p.reward_balance!=null?p.reward_balance:null), my_words:p.my_words||[] } }); }catch(e){ console.warn('save failed',e); }
+}
+
+let state = { user:null, email:'', level:'beginner',
+  profile:{ full_name:'анд', xp:0, streak:0, last_active:null, done:0, completed:[], my_words:[] } };
+let authMode='login', curLesson=null, curKey=null, sc=null;
+function isPro(){ const p=state.profile; return !!(p && p.pro_until && new Date(p.pro_until) > new Date()); }
+function goPro(){ go('app'); setTab('profile'); openDiscount(); window.scrollTo(0,0); }
+
+// aura wave
+(function(){ const w=document.getElementById('wave'); for(let i=0;i<7;i++){const b=document.createElement('i');b.style.animationDelay=(i*0.09)+'s';w.appendChild(b);} })();
+
+// ---- routing ----
+function go(view, mode){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('v-'+view).classList.add('active');
+  window.scrollTo(0,0);
+  if(view==='auth' && mode) setAuthMode(mode);
+}
+
+// ---- auth ----
+function setAuthMode(mode){
+  authMode=mode; const s=mode==='signup';
+  document.getElementById('tabLogin').classList.toggle('on',!s);
+  document.getElementById('tabSignup').classList.toggle('on',s);
+  document.getElementById('nameField').classList.toggle('hide',!s);
+  document.getElementById('authBtn').textContent = s?'Бүртгүүлэх':'Нэвтрэх';
+  document.getElementById('authTitle').textContent = s?'Бүртгүүлэх':'Тавтай морил';
+  document.getElementById('authLead').textContent = s?'Хэдхэн секунд, тэгээд хичээлдээ орно':'Англи ярианы аяллаа үргэлжлүүлье';
+  msg('');
+}
+function msg(t,ok){ const m=document.getElementById('authMsg'); m.textContent=t; m.className='msg '+(ok?'ok':'error'); }
+
+async function submitAuth(){
+  const name=document.getElementById('inName').value.trim();
+  const email=document.getElementById('inEmail').value.trim();
+  const pass=document.getElementById('inPass').value;
+  const btn=document.getElementById('authBtn');
+  if(!email||!pass){ msg('И-мэйл болон нууц үгээ оруулна уу.'); return; }
+  if(authMode==='signup'&&!name){ msg('Нэрээ оруулна уу.'); return; }
+  btn.disabled=true; btn.textContent='Түр хүлээнэ үү…';
+  try{
+    if(demoMode){
+      state.user={$id:'demo'}; state.email=email||'demo@aura.mn';
+      state.profile={ full_name:name||'анд', xp:0, streak:0, last_active:null, done:0, completed:[], my_words:[] };
+      enterApp(); return;
+    }
+    if(authMode==='signup'){
+      const { error:se } = await sb.auth.signUp({ email, password:pass, options:{ data:{ full_name:name } } });
+      if(se) throw se;
+    }
+    const { error:le } = await sb.auth.signInWithPassword({ email, password:pass });
+    if(le) throw le;
+    await afterLogin();
+  }catch(e){ msg(translateErr(e)); }
+  finally{ btn.disabled=false; btn.textContent = authMode==='signup'?'Бүртгүүлэх':'Нэвтрэх'; }
+}
+function translateErr(e){
+  const m=(e&&e.message)||'Алдаа гарлаа.';
+  if(/already registered|already been registered|already exists/i.test(m)) return 'Энэ и-мэйл аль хэдийн бүртгэлтэй байна.';
+  if(/invalid login credentials/i.test(m)) return 'И-мэйл эсвэл нууц үг буруу байна.';
+  if(/at least 6|password should/i.test(m)) return 'Нууц үг дор хаяж 6 тэмдэгт байх ёстой.';
+  if(/email not confirmed/i.test(m)) return 'И-мэйлээ баталгаажуулаагүй байна — Supabase дээр "Confirm email"-ийг унтраасан эсэхээ шалгаарай.';
+  return m;
+}
+async function afterLogin(){
+  const { data:{ user } } = await sb.auth.getUser();
+  if(!user) throw new Error('нэвтрээгүй');
+  state.user=user; state.email=user.email;
+  const p=user.user_metadata||{};
+  state.profile={ full_name:p.full_name||'анд', xp:p.xp||0, streak:p.streak||0,
+    last_active:p.last_active||null, done:p.done||0, completed:Array.isArray(p.completed)?p.completed:[],
+    referral_code:p.referral_code||null, ref_friends:p.ref_friends||0, reward_balance:(p.reward_balance!=null?p.reward_balance:null), pro_until:p.pro_until||null,
+    my_words:Array.isArray(p.my_words)?p.my_words:[] };
+  enterApp();
+}
+function enterApp(){ document.getElementById('inPass').value=''; paintApp(); renderLevels(); renderLessons(); go('app'); setTab('home'); }
+async function logout(){
+  try{ if(!demoMode&&sb) await sb.auth.signOut(); }catch(e){}
+  state={ user:null, email:'', level:'beginner', profile:{ full_name:'анд', xp:0, streak:0, last_active:null, done:0, completed:[], my_words:[] } };
+  chatStarted=false; document.getElementById('freeMsgs').innerHTML='';
+  go('landing');
+}
+
+// ---- paint stats ----
+function paintApp(){
+  const p=state.profile;
+  document.getElementById('hiName').textContent=p.full_name||'анд';
+  document.getElementById('homeXp').textContent=p.xp||0;
+  document.getElementById('homeStreak').textContent=p.streak||0;
+  document.getElementById('homeDone').textContent=p.done||0;
+  document.getElementById('profName').textContent=p.full_name||'Хэрэглэгч';
+  document.getElementById('profEmail').textContent=state.email||'—';
+  document.getElementById('profXp').textContent=p.xp||0;
+  document.getElementById('profStreak').textContent=p.streak||0;
+  document.getElementById('profDone').textContent=p.done||0;
+}
+
+// ---- tabs ----
+function setTab(tab){
+  document.querySelectorAll('.app-tabs button').forEach(b=>b.classList.toggle('on', b.dataset.tab===tab));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.getElementById('p-'+tab).classList.add('on');
+  if(tab==='chat') initChat();
+  if(tab==='vocab') renderVocabList();
+  if(tab==='games') renderGamesHub();
+  if(tab==='profile') renderReferral();
+  if(tab==='alpha') renderAlphaGrid();
+  window.scrollTo(0,0);
+}
+
+// ---- level switch ----
+function renderLevels(){
+  ['homeLevels','lessonLevels'].forEach(boxId=>{
+    const box=document.getElementById(boxId); box.innerHTML='';
+    Object.keys(LEVEL_INFO).forEach(lv=>{
+      const b=document.createElement('button'); b.className=(state.level===lv?'on':'');
+      const total=COURSES[lv].length;
+      const doneN=COURSES[lv].filter(l=>state.profile.completed.includes(lv+':'+l.id)).length;
+      const lk=(lv!=='beginner'&&!isPro())?' 🔒':'';
+      b.innerHTML=`<div class="t">${LEVEL_INFO[lv].name}${lk}</div><div class="s">${doneN}/${total} хичээл</div>`;
+      b.onclick=()=>{ state.level=lv; renderLevels(); renderLessons(); };
+      box.appendChild(b);
+    });
+  });
+}
+
+// ---- lesson list ----
+function renderLessons(){
+  const box=document.getElementById('llist'); box.innerHTML='';
+  const locked = state.level!=='beginner' && !isPro();
+  if(state.level==='a1'){
+    const pc=document.createElement('div'); pc.className='glass practice-card';
+    pc.innerHTML='<div class="gic">🎯</div><div><h3>A1 дасгал ажил'+((!isPro()&&!demoMode)?' 🔒':'')+'</h3><p>100 хичээлийн холимог дасгал · мэдэхгүй үг дээрээ товш</p></div>';
+    pc.onclick=startPractice;
+    box.appendChild(pc);
+  }
+  COURSES[state.level].forEach((l,i)=>{
+    const key=state.level+':'+l.id; const isDone=state.profile.completed.includes(key);
+    const el=document.createElement('div'); el.className='glass lcard'+(isDone?' done':'')+(locked?' locked':'');
+    el.innerHTML=`<div class="no">${locked?'🔒':(isDone?'✓':(i+1<10?'0':'')+(i+1))}</div>
+      <div class="body"><h3>${l.title}</h3><p>${l.blurb}</p></div>
+      <span class="lvl">${l.level}</span>`;
+    el.onclick=locked?goPro:()=>openLesson(state.level,i);
+    box.appendChild(el);
+  });
+}
+
+// ---- TTS ----
+let voices=[];
+function loadVoices(){ voices=window.speechSynthesis?speechSynthesis.getVoices():[]; }
+if('speechSynthesis' in window){ loadVoices(); speechSynthesis.onvoiceschanged=loadVoices; }
+function speak(text,btn){
+  if(!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text); u.lang='en-US'; u.rate=0.88;
+  const en=voices.find(v=>/en-US/i.test(v.lang))||voices.find(v=>/^en/i.test(v.lang)); if(en)u.voice=en;
+  if(btn){ btn.classList.add('playing'); u.onend=()=>btn.classList.remove('playing'); u.onerror=()=>btn.classList.remove('playing'); }
+  speechSynthesis.speak(u);
+}
+
+// ---- lesson detail ----
+function openLesson(level,i){
+  state.level=level; curLesson=COURSES[level][i]; curKey=level+':'+curLesson.id;
+  document.getElementById('dTitle').textContent=curLesson.title;
+  renderRule(); renderPron(); renderEx(); startSpeak();
+  go('lesson'); setSec('rule');
+}
+function closeLesson(){ go('app'); setTab('lessons'); renderLevels(); renderLessons(); }
+function setSec(s){
+  document.querySelectorAll('.subtabs button').forEach(b=>b.classList.toggle('on', b.dataset.s===s));
+  document.querySelectorAll('.sec').forEach(x=>x.classList.remove('on'));
+  document.getElementById('s-'+s).classList.add('on');
+}
+function renderRule(){ document.getElementById('s-rule').innerHTML=`<div class="glass rule"><h3>${curLesson.rule.h}</h3><div>${curLesson.rule.html}</div></div>`; }
+function renderPron(){
+  let h='';
+  curLesson.phrases.forEach(p=>{
+    h+=`<div class="glass phrase"><div class="txt"><div class="en">${p.en}</div><div class="pron">${p.pron}</div><div class="mn">${p.mn}</div></div>
+      <button class="speak" onclick="speak(${JSON.stringify(p.en).replace(/"/g,'&quot;')}, this)">🔊</button></div>`;
+  });
+  h+=`<div class="pron-note">Монгол дуудлага ойролцоо — 🔊 дарж жинхэнэ авиаг сонсоод давт</div>`;
+  document.getElementById('s-pron').innerHTML=h;
+}
+function renderEx(){
+  const box=document.getElementById('s-ex'); box.innerHTML='';
+  curLesson.exercises.forEach((ex,idx)=>{
+    const wrap=document.createElement('div'); wrap.className='glass ex';
+    const sent = ex.parts.length>1 ? `${tapWords(ex.parts[0])}<span class="blank"></span>${tapWords(ex.parts[1]||'')}` : `<span style="color:var(--dim)">Сонго:</span>`;
+    wrap.innerHTML=`<div class="q">${ex.q}</div><div class="sent">${sent}</div><div class="opts"></div><div class="exfix" id="fix${idx}"></div>`;
+    const opts=wrap.querySelector('.opts');
+    ex.opts.forEach((o,oi)=>{ const b=document.createElement('button'); b.className='opt'; b.textContent=o; b.onclick=()=>answerEx(wrap,ex,oi,idx); opts.appendChild(b); });
+    box.appendChild(wrap);
+  });
+}
+function answerEx(wrap,ex,oi,idx){
+  const btns=wrap.querySelectorAll('.opt'); btns.forEach(b=>b.disabled=true);
+  btns[oi].classList.add(oi===ex.a?'correct':'wrong');
+  if(oi!==ex.a) btns[ex.a].classList.add('correct');
+  const fix=document.getElementById('fix'+idx); fix.textContent='💡 '+ex.fix; fix.classList.add('show');
+}
+
+// ---- speaking (lesson scene) ----
+function startSpeak(){ sc={i:0}; document.getElementById('chatMsgs').innerHTML=''; document.getElementById('chatInteract').innerHTML=''; nextTurn(); }
+function nextTurn(){
+  const turns=curLesson.speak.turns;
+  if(sc.i>=turns.length){ finishSpeak(); return; }
+  const t=turns[sc.i]; addChat('bot','Ruby',t.ruby,t.pron,t.mn);
+  const box=document.getElementById('chatInteract'); box.innerHTML='<div class="choices"></div>';
+  const wrap=box.querySelector('.choices');
+  t.choices.forEach(ch=>{ const b=document.createElement('button'); b.className='choice'; b.textContent=ch.t; b.onclick=()=>pickChat(t,ch); wrap.appendChild(b); });
+}
+function addChat(role,who,text,pron,mn){
+  const box=document.getElementById('chatMsgs');
+  const el=document.createElement('div'); el.className='m '+(role==='bot'?'bot':'me');
+  el.innerHTML=`<span class="who">${who}</span>${text}`+(pron?`<span class="pr">🗣 ${pron}</span>`:'')+(mn?`<span class="mn">${mn}</span>`:'');
+  box.appendChild(el); if(role==='bot') speak(text); el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function pickChat(t,ch){
+  document.getElementById('chatInteract').innerHTML=''; addChat('me','Чи',ch.t);
+  if(!ch.best&&ch.fix){ const f=document.createElement('div'); f.className='exfix show'; f.innerHTML='💡 '+ch.fix; document.getElementById('chatMsgs').appendChild(f); }
+  sc.i++; setTimeout(nextTurn,700);
+}
+function finishSpeak(){
+  const box=document.getElementById('chatMsgs');
+  const firstTime = !state.profile.completed.includes(curKey);
+  const gained = firstTime ? XP_PER_LESSON : 0;
+  const d=document.createElement('div'); d.className='glass done-card'; d.style.marginTop='8px';
+  d.innerHTML=`<div class="big grad">${firstTime?'+'+gained+' XP':'Сайхан!'}</div><p style="color:var(--dim);margin:6px 0 14px">Хичээл дууслаа 🎉</p>`;
+  const b=document.createElement('button'); b.className='btn glow'; b.textContent='Хичээлүүд рүү'; b.onclick=closeLesson;
+  d.appendChild(b); box.appendChild(d); d.scrollIntoView({behavior:'smooth'});
+  if(firstTime) awardLesson(curKey, gained);
+}
+
+// ---- ахиц хадгалах ----
+async function awardLesson(key, xp){
+  const today=new Date().toISOString().slice(0,10);
+  const p=state.profile;
+  if(p.last_active!==today){
+    const y=new Date(Date.now()-86400000).toISOString().slice(0,10);
+    p.streak=(p.last_active===y)?(p.streak||0)+1:1; p.last_active=today;
+  }
+  p.completed.push(key); p.done=p.completed.length; p.xp=(p.xp||0)+xp;
+  paintApp();
+  if(demoMode) return;
+  try{
+    await saveProfile();
+    await sb.from('lesson_progress').insert({ user_id:state.user.id, scene:key, xp_earned:xp });
+  }catch(e){ console.warn('save failed',e); }
+}
+
+// ============================================================
+//  ЧӨЛӨӨТ ЯРИА (Ruby = Gemini via Supabase Edge Function)
+// ============================================================
+let chatHistory=[], chatStarted=false, chatBusy=false;
+function initChat(){
+  if(!isPro() && !demoMode){ renderChatLock(); return; }
+  const inp0=document.getElementById('freeInput'); if(inp0) inp0.disabled=false;
+  if(chatStarted) return; chatStarted=true; chatHistory=[];
+  freeAdd('bot','Ruby',"Hi! I'm Ruby. Let's chat in English. How are you today?","хай! айм Руби. летс чат ин Инглиш. хау а ю тудэй?","Сайн уу! Би Руби. Англиар ярилцъя. Юу байна?");
+}
+function renderChatLock(){
+  const box=document.getElementById('freeMsgs');
+  box.innerHTML='<div class="glass ref-card" style="text-align:center"><div class="ref-title">🔒 Ruby — Pro багцад</div><p class="ref-sub" style="margin:10px 0 14px">AI багштай хязгааргүй ярилцаж, алдаагаа зөөлөн засуулж, монгол тайлбартай суралц.</p><button class="btn glow" onclick="goPro()">Pro авах — 49,900₮/сар</button></div>';
+  const inp=document.getElementById('freeInput'); if(inp) inp.disabled=true;
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function freeAdd(role,who,text,pron,mn){
+  const box=document.getElementById('freeMsgs');
+  const el=document.createElement('div'); el.className='m '+(role==='bot'?'bot':'me');
+  el.innerHTML=`<span class="who">${who}</span>${escapeHtml(text)}`+(pron?`<span class="pr">🗣 ${escapeHtml(pron)}</span>`:'')+(mn?`<span class="mn">${escapeHtml(mn)}</span>`:'');
+  box.appendChild(el); if(role==='bot') speak(text); el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+async function sendFree(){
+  const inp=document.getElementById('freeInput'); const text=inp.value.trim();
+  if(!text||chatBusy) return; inp.value='';
+  freeAdd('me','Чи',text); chatHistory.push({role:'user',text}); chatBusy=true;
+  const typing=document.createElement('div'); typing.className='m bot'; typing.textContent='…';
+  document.getElementById('freeMsgs').appendChild(typing); typing.scrollIntoView({behavior:'smooth',block:'nearest'});
+  try{
+    const out=await askRuby(chatHistory, state.level); typing.remove();
+    if(out.fix){ const f=document.createElement('div'); f.className='exfix show'; f.innerHTML='💡 '+escapeHtml(out.fix); document.getElementById('freeMsgs').appendChild(f); }
+    freeAdd('bot','Ruby', out.reply, '', out.mn||''); chatHistory.push({role:'model', text:out.reply});
+  }catch(e){ typing.remove(); freeAdd('bot','Ruby',"Sorry, I had a little problem. Try again!", '', "Уучлаарай, алдаа гарлаа. Дахин оролдоорой!"); }
+  chatBusy=false;
+}
+async function askRuby(messages, level){
+  if(demoMode || !sb) return demoReply(messages);
+  const { data, error } = await sb.functions.invoke(RUBY_FUNCTION, { body:{ messages, level } });
+  if(error || !data) return demoReply(messages);
+  return { reply:data.reply||'…', mn:data.mn||'', fix:data.fix||'' };
+}
+function demoReply(messages){
+  const opts=[
+    {reply:"That's great! Tell me more.", mn:"Гоё! Илүү дэлгэрэнгүй хэлээч."},
+    {reply:"Nice! Why do you think so?", mn:"Сайхан! Яагаад тэгж бодов?"},
+    {reply:"Cool! What else do you like?", mn:"Гоё! Өөр юунд дуртай вэ?"},
+    {reply:"Awesome, you're doing really well!", mn:"Гайхалтай, чи сайн байна!"}
+  ];
+  return new Promise(r=>setTimeout(()=>r({...opts[Math.floor(Math.random()*opts.length)], fix:''}), 500));
+}
+
+// ============================================================
+//  ҮГСИЙН САН (сэдэвчилсэн + түвшин, флэшкарт, дасгал)
+// ============================================================
+let vFilter='all', curPack=null, vq=null, flashIdx=0;
+
+function renderVocabList(){
+  const chipBox=document.getElementById('vocabChips'); chipBox.innerHTML='';
+  ['all','A1','A2','B1'].forEach(lv=>{
+    const c=document.createElement('button'); c.className='chip'+(vFilter===lv?' on':'');
+    c.textContent=(lv==='all'?'Бүгд':lv); c.onclick=()=>{ vFilter=lv; renderVocabList(); };
+    chipBox.appendChild(c);
+  });
+  const box=document.getElementById('vlist'); box.innerHTML='';
+  const se=document.getElementById('vocabSearch'); const q=(se?se.value:'').trim().toLowerCase();
+  if(q){
+    let n=0;
+    VOCAB.filter(p=>(vFilter==='all'||p.level===vFilter)&&(isPro()||p.level==='A1')).forEach(p=>{
+      p.words.forEach(w=>{
+        if(w.en.toLowerCase().includes(q) || (w.mn||'').toLowerCase().includes(q)){
+          n++;
+          const el=document.createElement('div'); el.className='glass wcard';
+          el.innerHTML=`<div class="ic">${w.ic||'•'}</div><div class="txt"><div class="en">${w.en}</div><div class="pron">${w.pron}</div><div class="mn">${w.mn}</div><div style="font-size:11px;color:var(--dim);margin-top:4px">${p.icon} ${p.title} · ${p.level}</div></div><button class="speak" onclick="speak(${JSON.stringify(w.en).replace(/"/g,'&quot;')}, this)">🔊</button>`;
+          box.appendChild(el);
+        }
+      });
+    });
+    if(!n) box.innerHTML='<p class="pron-note">Үг олдсонгүй.</p>';
+    return;
+  }
+  const mw=state.profile.my_words||[];
+  if(mw.length){
+    const mp=myWordsPack();
+    const el=document.createElement('div'); el.className='glass lcard mywords-card';
+    el.innerHTML='<div class="no" style="font-size:26px">⭐</div><div class="body"><h3>Миний үгс</h3><p>'+mw.length+' үг · дасгалаас цуглуулсан</p></div><span class="lvl">Миний</span>';
+    el.onclick=()=>openPack(mp);
+    box.appendChild(el);
+  }
+  VOCAB.filter(p=>vFilter==='all'||p.level===vFilter).forEach(p=>{
+    const key='vocab:'+p.id; const done=state.profile.completed.includes(key);
+    const locked = p.level!=='A1' && !isPro();
+    const el=document.createElement('div'); el.className='glass lcard'+(done?' done':'')+(locked?' locked':'');
+    el.innerHTML=`<div class="no" style="font-size:26px">${locked?'🔒':(done?'✓':p.icon)}</div>
+      <div class="body"><h3>${p.title}</h3><p>${p.words.length} үг</p></div>
+      <span class="lvl">${p.level}</span>`;
+    el.onclick=locked?goPro:()=>openPack(p);
+    box.appendChild(el);
+  });
+}
+function openPack(p){
+  curPack=p; document.getElementById('vpTitle').textContent=p.title;
+  renderWords(); renderCards(); renderQuiz();
+  go('vpack'); setVSec('words');
+}
+function closePack(){ go('app'); setTab('vocab'); renderVocabList(); }
+function setVSec(s){
+  document.querySelectorAll('.subtabs button[data-vs]').forEach(b=>b.classList.toggle('on', b.dataset.vs===s));
+  document.querySelectorAll('.vsec').forEach(x=>x.classList.remove('on'));
+  document.getElementById('vs-'+s).classList.add('on');
+}
+function renderWords(){
+  let h='';
+  curPack.words.forEach(w=>{
+    h+=`<div class="glass wcard"><div class="ic">${w.ic||'•'}</div><div class="txt">
+      <div class="en">${w.en}</div><div class="pron">${w.pron}</div><div class="mn">${w.mn}</div>
+      ${w.ex?`<div class="ex">${w.ex.en} <span style="color:var(--cyan)">(${w.ex.pron})</span><br>${w.ex.mn}</div>`:``}
+    </div><button class="speak" onclick="speak(${JSON.stringify(w.en).replace(/"/g,'&quot;')}, this)">🔊</button></div>`;
+  });
+  document.getElementById('vs-words').innerHTML=h;
+}
+function renderCards(){
+  flashIdx=0;
+  document.getElementById('vs-cards').innerHTML=`
+    <div class="flash-wrap">
+      <div class="flash" id="flashCard" onclick="this.classList.toggle('flip')">
+        <div class="flash-in">
+          <div class="glass flash-face" id="flashFront"></div>
+          <div class="glass flash-face flash-back" id="flashBack"></div>
+        </div>
+      </div>
+      <div class="flash-nav">
+        <button class="btn ghost" onclick="flashMove(-1)">←</button>
+        <button class="speak" onclick="speakFlash(this)">🔊</button>
+        <span class="flash-count" id="flashCount"></span>
+        <button class="btn ghost" onclick="flashMove(1)">→</button>
+      </div>
+      <p class="pron-note">Картыг товшиж эргүүл — англи ⟷ монгол</p>
+    </div>`;
+  paintFlash();
+}
+function paintFlash(){
+  const w=curPack.words[flashIdx];
+  document.getElementById('flashFront').innerHTML=`<div class="ic">${w.ic||''}</div><div class="big">${w.en}</div><div class="fpron">🗣 ${w.pron}</div>`;
+  document.getElementById('flashBack').innerHTML=`<div class="fmn">${w.mn}</div>`;
+  document.getElementById('flashCount').textContent=(flashIdx+1)+' / '+curPack.words.length;
+  document.getElementById('flashCard').classList.remove('flip');
+}
+function flashMove(d){ flashIdx=(flashIdx+d+curPack.words.length)%curPack.words.length; paintFlash(); }
+function speakFlash(btn){ speak(curPack.words[flashIdx].en, btn); }
+
+function renderQuiz(){
+  if(!curPack.words.length){ document.getElementById('vs-quiz').innerHTML='<p class="pron-note">Энэ багцад үг алга.</p>'; return; }
+  if(curPack.words.length<4){ document.getElementById('vs-quiz').innerHTML='<p class="pron-note">Сорил эхлүүлэхэд дор хаяж 4 үг хэрэгтэй. Дасгал хийж үг цуглуулаарай!</p>'; return; }
+  const _order=curPack.words.map((_,i)=>i).sort(()=>Math.random()-0.5);
+  const _types=['en2mn','mn2en','listen','spell'];
+  vq={ i:0, correct:0, order:_order, qtype:_order.map(()=>_types[Math.floor(Math.random()*_types.length)]) };
+  document.getElementById('vs-quiz').innerHTML='<div class="quiz-progress" id="qProg"></div><div id="qBody"></div>';
+  quizStep();
+}
+function quizStep(){
+  const total=vq.order.length;
+  if(vq.i>=total){ quizDone(); return; }
+  document.getElementById('qProg').textContent=(vq.i+1)+' / '+total;
+  const wi=vq.order[vq.i]; const w=curPack.words[wi]; const type=vq.qtype[vq.i];
+  const body=document.getElementById('qBody');
+  const spk=(t)=>`<button class="speak" style="width:34px;height:34px;font-size:15px;display:inline-grid;vertical-align:middle" onclick="speak(${JSON.stringify(t).replace(/"/g,'&quot;')}, this)">🔊</button>`;
+  if(type==='spell'){
+    body.innerHTML=`<div class="glass ex"><div class="q">Англиар нь бич:</div>
+      <div class="sent">${w.ic||''} ${w.mn}</div>
+      <div class="chat-input"><input id="spellIn" type="text" placeholder="англиар бич..." autocomplete="off" autocapitalize="off" spellcheck="false" onkeydown="if(event.key==='Enter')spellCheck()"/><button class="btn glow" onclick="spellCheck()">Шалгах</button></div>
+      <div class="exfix" id="spellFix"></div></div>`;
+    setTimeout(()=>{ const el=document.getElementById('spellIn'); if(el) el.focus(); },60);
+    return;
+  }
+  let answer, options, prompt, qlabel;
+  if(type==='mn2en'){
+    answer=w.en; qlabel='Англиар нь сонго:';
+    prompt=`${w.ic||''} ${w.mn}`;
+    const o=curPack.words.filter((_,i)=>i!==wi).map(x=>x.en).sort(()=>Math.random()-0.5).slice(0,3);
+    options=[w.en,...o].sort(()=>Math.random()-0.5);
+  } else {
+    answer=w.mn;
+    const o=curPack.words.filter((_,i)=>i!==wi).map(x=>x.mn).sort(()=>Math.random()-0.5).slice(0,3);
+    options=[w.mn,...o].sort(()=>Math.random()-0.5);
+    if(type==='listen'){ qlabel='Сонсоод сонго:'; prompt=`<button class="speak" style="width:58px;height:58px;font-size:26px" onclick="speak(${JSON.stringify(w.en).replace(/"/g,'&quot;')}, this)">🔊</button>`; }
+    else { qlabel='Орчуулга нь аль вэ:'; prompt=`${w.ic||''} ${w.en} ${spk(w.en)}`; }
+  }
+  body.innerHTML=`<div class="glass ex"><div class="q">${qlabel}</div><div class="sent">${prompt}</div><div class="opts" id="qOpts"></div></div>`;
+  const box=document.getElementById('qOpts');
+  options.forEach(o=>{ const b=document.createElement('button'); b.className='opt'; b.textContent=o; b.onclick=()=>quizAnswer(b,o,answer); box.appendChild(b); });
+  if(type==='listen') setTimeout(()=>speak(w.en),300);
+}
+function spellCheck(){
+  const wi=vq.order[vq.i]; const w=curPack.words[wi];
+  const inp=document.getElementById('spellIn'); if(!inp||inp.disabled) return;
+  const val=inp.value.trim().toLowerCase(); const correct=w.en.trim().toLowerCase();
+  const fix=document.getElementById('spellFix'); inp.disabled=true;
+  const gbtn=document.querySelector('#qBody .btn.glow'); if(gbtn) gbtn.disabled=true;
+  if(val===correct){ vq.correct++; inp.style.borderColor='var(--mint)'; fix.innerHTML='✅ Зөв!'; }
+  else { inp.style.borderColor='var(--err)'; fix.innerHTML='💡 Зөв хариу: <b>'+w.en+'</b>'; }
+  fix.classList.add('show');
+  setTimeout(()=>{ vq.i++; quizStep(); }, 1100);
+}
+function quizAnswer(btn,chosen,correct){
+  const btns=document.querySelectorAll('#qOpts .opt'); btns.forEach(b=>b.disabled=true);
+  if(chosen===correct){ btn.classList.add('correct'); vq.correct++; }
+  else{ btn.classList.add('wrong'); btns.forEach(b=>{ if(b.textContent===correct) b.classList.add('correct'); }); }
+  setTimeout(()=>{ vq.i++; quizStep(); }, 750);
+}
+function quizDone(){
+  const total=vq.order.length; const key='vocab:'+curPack.id;
+  const firstTime=!state.profile.completed.includes(key);
+  const gained=firstTime?XP_PER_PACK:0;
+  document.getElementById('qProg').textContent='';
+  const body=document.getElementById('qBody');
+  body.innerHTML=`<div class="glass done-card"><div class="big grad">${vq.correct}/${total}</div>
+    <p style="color:var(--dim);margin:6px 0 14px">${firstTime?('+'+gained+' XP'):'Дахин хийлээ'} 🎉</p></div>`;
+  const d=body.querySelector('.done-card');
+  const again=document.createElement('button'); again.className='btn ghost'; again.style.marginRight='8px'; again.textContent='Дахин'; again.onclick=()=>{ renderQuiz(); };
+  const back=document.createElement('button'); back.className='btn glow'; back.textContent='Үгс рүү'; back.onclick=closePack;
+  d.appendChild(again); d.appendChild(back);
+  if(firstTime) awardPack(key, gained);
+}
+async function awardPack(key, xp){
+  const today=new Date().toISOString().slice(0,10); const p=state.profile;
+  if(p.last_active!==today){ const y=new Date(Date.now()-86400000).toISOString().slice(0,10); p.streak=(p.last_active===y)?(p.streak||0)+1:1; p.last_active=today; }
+  p.completed.push(key); p.done=p.completed.length; p.xp=(p.xp||0)+xp; paintApp();
+  if(demoMode) return;
+  try{
+    await saveProfile();
+    await sb.from('lesson_progress').insert({ user_id:state.user.id, scene:key, xp_earned:xp });
+  }catch(e){ console.warn('save failed',e); }
+}
+
+// ============================================================
+//  ҮГИЙН ТОГЛООМ (Хос тааруул · Хурдны тэмцээн · Санах ойн карт)
+// ============================================================
+let gameLevel='all', currentGame=null, matchState=null, speedState=null, memState=null;
+
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function gameWords(level){ let pool=[]; VOCAB.forEach(p=>{ if((level==='all'||p.level===level)&&(isPro()||p.level==='A1')) p.words.forEach(w=>pool.push(w)); }); if(!pool.length){ VOCAB.forEach(p=>{ if(p.level==='A1') p.words.forEach(w=>pool.push(w)); }); } return pool; }
+
+function renderGamesHub(){
+  const box=document.getElementById('gameChips'); box.innerHTML='';
+  ['all','A1','A2','B1','B2'].forEach(lv=>{
+    const c=document.createElement('button'); c.className='chip'+(gameLevel===lv?' on':'');
+    c.textContent=(lv==='all'?'Бүх түвшин':lv); c.onclick=()=>{ gameLevel=lv; renderGamesHub(); };
+    box.appendChild(c);
+  });
+}
+function gameTitle(t){ document.getElementById('gameTitle').textContent=t; }
+function startGame(type){
+  if(speedState&&speedState.timer){ clearInterval(speedState.timer); speedState.timer=null; }
+  currentGame=type; go('game');
+  if(type==='match') startMatch();
+  else if(type==='speed') startSpeed();
+  else if(type==='memory') startMemory();
+}
+function backToGames(){
+  if(speedState&&speedState.timer){ clearInterval(speedState.timer); speedState.timer=null; }
+  go('app'); setTab('games');
+}
+function gameResult(inner, xp){
+  const body=document.getElementById('gameBody');
+  body.innerHTML=`<div class="glass done-card">${inner}${xp?('<p style="color:var(--mint);margin:8px 0 14px">+'+xp+' XP 🎉</p>'):'<div style="height:12px"></div>'}</div>`;
+  const d=body.querySelector('.done-card');
+  const again=document.createElement('button'); again.className='btn ghost'; again.style.marginRight='8px'; again.textContent='Дахин'; again.onclick=()=>startGame(currentGame);
+  const back=document.createElement('button'); back.className='btn glow'; back.textContent='Тоглоомууд'; back.onclick=backToGames;
+  d.appendChild(again); d.appendChild(back);
+  awardGameXp(xp);
+}
+
+/* ---- 1. Хос тааруул ---- */
+function startMatch(){
+  gameTitle('🔗 Хос тааруул');
+  const pool=shuffle(gameWords(gameLevel)).slice(0,6);
+  matchState={ total:pool.length, matched:0, sel:null };
+  const ens=shuffle(pool.map((w,i)=>({i,w}))), mns=shuffle(pool.map((w,i)=>({i,w})));
+  document.getElementById('gameBody').innerHTML=`<div class="match-grid"><div class="match-col" id="mcEn"></div><div class="match-col" id="mcMn"></div></div><div class="game-status" id="gStatus"></div>`;
+  const enBox=document.getElementById('mcEn'), mnBox=document.getElementById('mcMn');
+  ens.forEach(o=>{ const b=document.createElement('button'); b.className='mtile'; b.textContent=o.w.en; b.dataset.i=o.i; b.onclick=()=>matchPickEn(b); enBox.appendChild(b); });
+  mns.forEach(o=>{ const b=document.createElement('button'); b.className='mtile'; b.textContent=o.w.mn; b.dataset.i=o.i; b.onclick=()=>matchPickMn(b); mnBox.appendChild(b); });
+  matchStatus();
+}
+function matchStatus(){ document.getElementById('gStatus').textContent=matchState.matched+' / '+matchState.total+' хос'; }
+function matchPickEn(b){
+  if(b.classList.contains('done')) return;
+  document.querySelectorAll('#mcEn .mtile').forEach(x=>x.classList.remove('sel'));
+  b.classList.add('sel'); matchState.sel=b; speak(b.textContent);
+}
+function matchPickMn(b){
+  if(b.classList.contains('done')||!matchState.sel) return;
+  const en=matchState.sel;
+  if(en.dataset.i===b.dataset.i){
+    en.classList.add('done'); b.classList.add('done'); en.classList.remove('sel'); matchState.sel=null; matchState.matched++;
+    matchStatus();
+    if(matchState.matched>=matchState.total) gameResult('<div class="big grad">Бүтэн!</div><p style="color:var(--dim);margin:6px 0 0">Бүх хосыг тааруулав</p>', 10);
+  } else {
+    b.classList.add('wrong'); en.classList.add('wrong');
+    setTimeout(()=>{ b.classList.remove('wrong'); en.classList.remove('wrong','sel'); matchState.sel=null; }, 480);
+  }
+}
+
+/* ---- 2. Хурдны тэмцээн ---- */
+function startSpeed(){
+  gameTitle('⚡ Хурдны тэмцээн');
+  speedState={ score:0, combo:0, time:45, timer:null };
+  document.getElementById('gameBody').innerHTML=`
+    <div class="speed-top"><div>Оноо: <b id="spScore">0</b></div><div class="speed-combo" id="spCombo"></div><div><b id="spTime">45</b>с</div></div>
+    <div class="timebar"><div class="timebar-fill" id="tbFill"></div></div>
+    <div id="speedQ"></div>`;
+  speedState.timer=setInterval(()=>{
+    speedState.time--;
+    const tEl=document.getElementById('spTime'); if(!tEl){ clearInterval(speedState.timer); return; }
+    tEl.textContent=speedState.time; document.getElementById('tbFill').style.width=(speedState.time/45*100)+'%';
+    if(speedState.time<=0) speedEnd();
+  },1000);
+  speedNext();
+}
+function speedNext(){
+  const pool=gameWords(gameLevel);
+  const w=pool[Math.floor(Math.random()*pool.length)];
+  const others=shuffle(pool.filter(x=>x.mn!==w.mn)).slice(0,3).map(x=>x.mn);
+  const opts=shuffle([w.mn,...others]);
+  document.getElementById('speedQ').innerHTML=`<div class="glass sq"><div class="sq-word">${w.ic||''} ${w.en} <button class="speak" style="width:34px;height:34px;font-size:15px;display:inline-grid;vertical-align:middle" onclick="speak(${JSON.stringify(w.en).replace(/"/g,'&quot;')}, this)">🔊</button></div><div class="opts" id="sqOpts"></div></div>`;
+  const box=document.getElementById('sqOpts');
+  opts.forEach(o=>{ const b=document.createElement('button'); b.className='opt'; b.textContent=o; b.onclick=()=>speedAns(b,o,w.mn); box.appendChild(b); });
+}
+function speedAns(b,chosen,correct){
+  if(speedState.time<=0) return;
+  document.querySelectorAll('#sqOpts .opt').forEach(x=>x.disabled=true);
+  if(chosen===correct){ speedState.score+=10+speedState.combo*2; speedState.combo++; b.classList.add('correct'); }
+  else{ speedState.combo=0; b.classList.add('wrong'); document.querySelectorAll('#sqOpts .opt').forEach(x=>{ if(x.textContent===correct) x.classList.add('correct'); }); }
+  document.getElementById('spScore').textContent=speedState.score;
+  document.getElementById('spCombo').textContent=speedState.combo>1?('🔥 x'+speedState.combo):'';
+  setTimeout(()=>{ if(speedState.time>0) speedNext(); }, chosen===correct?220:520);
+}
+function speedEnd(){
+  if(speedState.timer){ clearInterval(speedState.timer); speedState.timer=null; }
+  const xp=Math.min(30, Math.floor(speedState.score/20));
+  gameResult('<div class="big grad">'+speedState.score+'</div><p style="color:var(--dim);margin:6px 0 0">оноо цуглууллаа</p>', xp);
+}
+
+/* ---- 3. Санах ойн карт ---- */
+function startMemory(){
+  gameTitle('🃏 Санах ойн карт');
+  const pool=shuffle(gameWords(gameLevel)).slice(0,6);
+  let cards=[];
+  pool.forEach((w,i)=>{ cards.push({id:i,face:w.en,type:'en'}); cards.push({id:i,face:w.mn,type:'mn'}); });
+  cards=shuffle(cards);
+  memState={ cards, first:null, lock:false, matched:0, total:pool.length, moves:0 };
+  document.getElementById('gameBody').innerHTML='<div class="mem-grid" id="memGrid"></div><div class="game-status" id="gStatus"></div>';
+  const grid=document.getElementById('memGrid');
+  cards.forEach((c,idx)=>{ const b=document.createElement('button'); b.className='memcard'; b.innerHTML='<span class="mem-face">❓</span>'; b.onclick=()=>memFlip(b,idx); grid.appendChild(b); });
+  memStatus();
+}
+function memStatus(){ document.getElementById('gStatus').textContent=memState.matched+' / '+memState.total+' хос · '+memState.moves+' оролдлого'; }
+function memFlip(b,idx){
+  if(memState.lock||b.classList.contains('open')||b.classList.contains('done')) return;
+  const c=memState.cards[idx];
+  b.classList.add('open'); b.querySelector('.mem-face').textContent=c.face;
+  if(c.type==='en') speak(c.face);
+  if(!memState.first){ memState.first={b,idx,c}; return; }
+  memState.moves++; memStatus();
+  const f=memState.first; memState.first=null;
+  if(f.c.id===c.id && f.idx!==idx){
+    f.b.classList.add('done'); b.classList.add('done'); memState.matched++; memStatus();
+    if(memState.matched>=memState.total) gameResult('<div class="big grad">'+memState.moves+'</div><p style="color:var(--dim);margin:6px 0 0">оролдлогоор дуусгав</p>', 12);
+  } else {
+    memState.lock=true;
+    setTimeout(()=>{ f.b.classList.remove('open'); b.classList.remove('open'); f.b.querySelector('.mem-face').textContent='❓'; b.querySelector('.mem-face').textContent='❓'; memState.lock=false; }, 780);
+  }
+}
+
+/* ---- XP урамшуулал ---- */
+async function awardGameXp(xp){
+  const p=state.profile;
+  if(!xp||xp<=0){ paintApp(); return; }
+  const today=new Date().toISOString().slice(0,10);
+  if(p.last_active!==today){ const y=new Date(Date.now()-86400000).toISOString().slice(0,10); p.streak=(p.last_active===y)?(p.streak||0)+1:1; p.last_active=today; }
+  p.xp=(p.xp||0)+xp; paintApp();
+  if(demoMode) return;
+  try{ await saveProfile(); }catch(e){}
+}
+
+// ============================================================
+//  НАЙЗАА УРИХ (Referral) — сонголттой: мөнгө авах / хямдралаар багц авах
+// ============================================================
+const REWARD_PER = 2500;          // найз бүрт (₮)
+const WITHDRAW_MIN = 25000;       // бэлэн мөнгө гаргах доод дүн (₮) = 10 найз
+const PRICE_MONTHLY = 49900;      // Pro багц сарын үнэ (₮)
+const MAX_DISCOUNT_PCT = 0.5;
+const PAY_BANK    = "Хаан банк";
+const PAY_ACCOUNT = "5301485964";
+const PAY_HOLDER  = "Б.Энхмаа";
+
+function makeRefCode(){ return 'AURA' + Math.floor(1000+Math.random()*9000); }
+function refVal(id){ const e=document.getElementById(id); return e?e.value.trim():''; }
+function tg(n){ return (n||0).toLocaleString('en-US'); }
+
+function renderReferral(){
+  const p=state.profile;
+  if(!p.referral_code) p.referral_code = makeRefCode();
+  if(p.reward_balance==null) p.reward_balance = (p.ref_friends||0)*REWARD_PER;
+  const friends=p.ref_friends||0, bal=p.reward_balance||0;
+  const canWithdraw = bal>=WITHDRAW_MIN;
+  let base=''; try{ base=location.origin+location.pathname; }catch(e){ base='https://aura.mn/'; }
+  const link=base+'?ref='+p.referral_code;
+  const box=document.getElementById('refSection'); if(!box) return;
+  box.innerHTML=`
+    <div class="glass ref-card">
+      <div class="ref-title">💰 Найзаа урьж мөнгө ол</div>
+      <div class="rp-txt" style="text-align:left;margin-bottom:8px">${isPro()?('⭐ PRO идэвхтэй — '+String(state.profile.pro_until).slice(0,10)+' хүртэл'):'Энгийн эрх: Үсэг + Анхан шат + A1 үгс үнэгүй'}</div>
+      <p class="ref-sub">Найз тань багц авах бүрт танд <b>${tg(REWARD_PER)}₮</b>. Урамшууллаа <b>бэлнээр авах</b> эсвэл <b>хичээлдээ хямдралаар</b> ашиглаж болно.</p>
+      <div class="ref-balance">
+        <div><div class="rb-n">${tg(bal)}₮</div><div class="rb-l">Боломжит урамшуулал</div></div>
+        <div><div class="rb-n">${friends}</div><div class="rb-l">Урьсан найз</div></div>
+      </div>
+      <div class="ref-code"><span>${p.referral_code}</span><button class="btn glow" id="refCopyBtn" onclick="copyRef(${JSON.stringify(link).replace(/"/g,'&quot;')})">Хуулах</button></div>
+      <div class="ref-actions">
+        <button class="btn ghost" onclick="openDiscount()">🎓 Pro авах</button>
+        <button class="btn glow" ${canWithdraw?'':'disabled'} onclick="openWithdraw()">💵 Мөнгө гаргах</button>
+      </div>
+      ${canWithdraw?'':`<div class="rp-txt" style="margin-top:10px">Бэлэн мөнгө гаргахад ${tg(WITHDRAW_MIN)}₮ (10 найз) шаардлагатай · одоо ${tg(bal)}₮</div>`}
+      <div class="ref-demo">🧪 Туршилт: <button class="ref-sim" onclick="simInvite()">найз төлбөр төлсөн гэж үзэх +1</button></div>
+    </div>`;
+}
+
+function copyRef(link){
+  const btn=document.getElementById('refCopyBtn');
+  const done=()=>{ if(btn){ const t=btn.textContent; btn.textContent='Хуулагдлаа ✓'; setTimeout(()=>btn.textContent=t,1500); } };
+  try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(link).then(done).catch(done); } else { done(); } }catch(e){ done(); }
+}
+
+function simInvite(){
+  const p=state.profile;
+  p.ref_friends=(p.ref_friends||0)+1;
+  p.reward_balance=(p.reward_balance||0)+REWARD_PER;
+  renderReferral(); saveRef();
+}
+function saveRef(){
+  const p=state.profile; if(demoMode) return;
+  saveProfile();
+}
+
+/* ---- Хичээлдээ ашиглах (хямдрал, дээд тал 50%) ---- */
+function openDiscount(){
+  const p=state.profile; const bal=p.reward_balance||0;
+  const maxDisc=Math.floor(PRICE_MONTHLY*MAX_DISCOUNT_PCT);
+  const disc=Math.min(bal, maxDisc);
+  const final=PRICE_MONTHLY-disc;
+  document.getElementById('refSection').innerHTML=`
+    <div class="glass ref-card">
+      <div class="ref-title">🎓 Pro багц авах</div>
+      <p class="ref-sub">Сарын багц — бүх хичээл, 1000+ үг, AI яриа</p>
+      <div class="price-row"><span>Үнэ</span><span>${tg(PRICE_MONTHLY)}₮</span></div>
+      <div class="price-row"><span>Урамшуулал (дээд тал 50%)</span><span style="color:var(--mint)">−${tg(disc)}₮</span></div>
+      <div class="price-row total"><span>Төлөх дүн</span><span>${tg(final)}₮</span></div>
+      ${bal>disc?`<div class="rp-txt" style="text-align:left;margin:8px 0 0">Нэг удаад үнийн 50% хүртэл л ашиглана. Үлдэх урамшуулал: ${tg(bal-disc)}₮</div>`:''}
+      <button class="btn glow full" style="margin-top:16px" onclick="payPro(${final},${disc})">QPay-ээр төлөх</button>
+      <button class="btn ghost full" style="margin-top:8px" onclick="renderReferral()">← Буцах</button>
+    </div>`;
+}
+function payPro(final, disc){
+  document.getElementById('refSection').innerHTML=`
+    <div class="glass ref-card">
+      <div class="ref-title">QPay төлбөр</div>
+      <p class="ref-sub" style="line-height:1.6">Доорх данс руу <b>${tg(final)}₮</b> шилжүүлээд, гүйлгээний утгад <b>${state.profile.referral_code}</b> бичнэ үү.</p>
+      <div class="pay-box"><div>Банк: <b>${PAY_BANK}</b></div><div>Данс: <b>${PAY_ACCOUNT}</b></div><div>Хүлээн авагч: <b>${PAY_HOLDER}</b></div><div>Дүн: <b>${tg(final)}₮</b></div><div>Гүйлгээний утга: <b>${state.profile.referral_code}</b></div></div>
+      <button class="btn glow full" onclick="confirmPay(${disc})">Төлбөр шилжүүлсэн</button>
+      <button class="btn ghost full" style="margin-top:8px" onclick="renderReferral()">← Буцах</button>
+    </div>`;
+}
+function confirmPay(disc){
+  const p=state.profile;
+  const final=PRICE_MONTHLY-disc;
+  if(!demoMode&&sb&&state.user){ try{ sb.from('payments').insert({ user_id:state.user.id, email:state.email, amount:final, discount:disc, ref_code:p.referral_code||'', status:'requested' }).then(()=>{}); }catch(e){} }
+  p.reward_balance=Math.max(0,(p.reward_balance||0)-disc);
+  saveRef();
+  document.getElementById('refSection').innerHTML=`
+    <div class="glass ref-card" style="text-align:center">
+      <div class="ref-title">✅ Хүлээн авлаа</div>
+      <p class="ref-sub" style="margin:12px 0;line-height:1.6">Төлбөрийг шалгаад багцыг тань идэвхжүүлнэ.${disc>0?(' Урамшууллаас '+tg(disc)+'₮ хасагдлаа.'):''}</p>
+      <button class="btn glow" onclick="renderReferral()">Болсон</button>
+    </div>`;
+}
+
+/* ---- Бэлэн мөнгө гаргах ---- */
+function openWithdraw(){
+  const p=state.profile; const bal=p.reward_balance||0;
+  document.getElementById('refSection').innerHTML=`
+    <div class="glass ref-card">
+      <div class="ref-title">💵 Мөнгө гаргах</div>
+      <p class="ref-sub">Гаргах дүн: <b style="color:var(--mint)">${tg(bal)}₮</b></p>
+      <div class="wd-field"><label>Банк</label><input id="wdBank" placeholder="Жишээ: Хаан банк" /></div>
+      <div class="wd-field"><label>Дансны дугаар</label><input id="wdAcc" inputmode="numeric" placeholder="5xxxxxxxxx" /></div>
+      <div class="wd-field"><label>Данс эзэмшигчийн нэр</label><input id="wdName" placeholder="Овог нэр" /></div>
+      <button class="btn glow full" onclick="submitWithdraw()">Хүсэлт илгээх</button>
+      <button class="btn ghost full" style="margin-top:8px" onclick="renderReferral()">← Буцах</button>
+      <div class="msg" id="wdMsg"></div>
+    </div>`;
+}
+function submitWithdraw(){
+  const bank=refVal('wdBank'), acc=refVal('wdAcc'), name=refVal('wdName');
+  const m=document.getElementById('wdMsg');
+  if(!bank||!acc||!name){ m.className='msg error'; m.textContent='Бүх талбарыг бөглөнө үү.'; return; }
+  const p=state.profile; const amount=p.reward_balance||0;
+  if(!demoMode&&sb){ try{ sb.from('withdrawals').insert({ user_id:state.user.id, amount:amount, bank:bank, account:acc, holder:name, status:'requested' }).then(()=>{}); }catch(e){} }
+  p.reward_balance=0; saveRef();
+  document.getElementById('refSection').innerHTML=`
+    <div class="glass ref-card" style="text-align:center">
+      <div class="ref-title">✅ Хүсэлт илгээгдлээ</div>
+      <p class="ref-sub" style="margin:12px 0;line-height:1.6">${tg(amount)}₮-ийн хүсэлтийг хүлээн авлаа.<br>1-2 ажлын өдөрт <b>${bank}</b> · <b>${acc}</b> данс руу шилжүүлнэ.</p>
+      <button class="btn glow" onclick="renderReferral()">Болсон</button>
+    </div>`;
+}
+
+// ============================================================
+//  ЦАГААН ТОЛГОЙ (ABC + фоник) — үсэг мэдэхгүй хүнд зориулав
+// ============================================================
+let alphaIdx=0;
+
+function renderAlphaGrid(){
+  const box=document.getElementById('alphaGrid'); if(!box) return; box.innerHTML='';
+  ALPHA.forEach((a,i)=>{
+    const el=document.createElement('div'); el.className='acard'+(a.vowel?' vow':'');
+    el.innerHTML=`<div class="al">${a.L}${a.L.toLowerCase()}</div><div class="an">${a.name}</div>`;
+    el.onclick=()=>openLetter(i);
+    box.appendChild(el);
+  });
+}
+function openLetter(i){
+  alphaIdx=i; const a=ALPHA[i];
+  document.getElementById('alTitle').textContent=a.L+a.L.toLowerCase()+' үсэг';
+  const sounds=a.sounds.map(s=>`<div class="glass al-sound"><div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><div class="ss">Авиа: <b>«${s.s}»</b></div><div class="ex">${s.ex.en} → «${s.ex.pron}» — ${s.ex.mn}</div></div><button class="speak" onclick="speak(${JSON.stringify(s.ex.en).replace(/"/g,'&quot;')}, this)">🔊</button></div></div>`).join('');
+  document.getElementById('alBody').innerHTML=`
+    <div class="glass al-hero">
+      <div class="al-big ${a.vowel?'vow':''}">${a.L}${a.L.toLowerCase()}</div>
+      <div class="al-name">Нэр: <b>«${a.name}»</b> <button class="speak" style="width:38px;height:38px;font-size:17px;display:inline-grid;vertical-align:middle" onclick="speak(${JSON.stringify(a.L).replace(/"/g,'&quot;')}, this)">🔊</button></div>
+      <div class="al-tag">${a.vowel?'Эгшиг':'Гийгүүлэгч'}</div>
+    </div>
+    <div class="al-sec-h">Үгэн дотор ямар авиа гаргадаг вэ?</div>
+    ${sounds}
+    ${a.note?`<div class="al-note">💡 ${a.note}</div>`:''}
+    <div class="al-nav"><button class="btn ghost" onclick="moveLetter(-1)">← Өмнөх</button><button class="btn glow" onclick="moveLetter(1)">Дараах →</button></div>`;
+  go('aldetail'); window.scrollTo(0,0);
+}
+function closeLetter(){ go('app'); setTab('alpha'); }
+function moveLetter(d){ alphaIdx=(alphaIdx+d+ALPHA.length)%ALPHA.length; openLetter(alphaIdx); }
+
+// ============================================================
+//  ҮСГИЙН ДАСГАЛ — сонсох / нэр / эгшиг / авиа
+// ============================================================
+let aq=null;
+
+function startAlphaDrill(){
+  const order=[];
+  for(let k=0;k<10;k++) order.push(Math.floor(Math.random()*ALPHA.length));
+  const types=['listen','name','vowel','sound'];
+  aq={ i:0, correct:0, order, qtype:order.map(()=>types[Math.floor(Math.random()*types.length)]) };
+  document.getElementById('adTitle').textContent='Үсгийн дасгал';
+  go('aldrill'); alphaDrillStep();
+}
+function alphaDrillStep(){
+  const total=aq.order.length;
+  if(aq.i>=total){ alphaDrillDone(); return; }
+  const a=ALPHA[aq.order[aq.i]]; const type=aq.qtype[aq.i];
+  const prog=(aq.i+1)+' / '+total;
+  const body=document.getElementById('adBody');
+  let qlabel, prompt, answer, options;
+  if(type==='listen'){
+    qlabel='Сонсоод аль үсэг болохыг ол:';
+    prompt=`<button class="speak" style="width:58px;height:58px;font-size:26px" onclick="speak('${a.L}', this)">🔊</button>`;
+    answer=a.L;
+    options=alphaOpts(a, x=>x.L);
+  } else if(type==='name'){
+    qlabel='Энэ үсгийн нэр юу вэ?';
+    prompt=`<span class="ad-letter${a.vowel?' vow':''}">${a.L}${a.L.toLowerCase()}</span>`;
+    answer=a.name;
+    options=alphaOpts(a, x=>x.name);
+  } else if(type==='vowel'){
+    qlabel='Энэ үсэг эгшиг үү, гийгүүлэгч үү?';
+    prompt=`<span class="ad-letter${a.vowel?' vow':''}">${a.L}${a.L.toLowerCase()}</span>`;
+    answer=a.vowel?'Эгшиг':'Гийгүүлэгч';
+    options=['Эгшиг','Гийгүүлэгч'];
+  } else {
+    const snd=a.sounds[Math.floor(Math.random()*a.sounds.length)];
+    qlabel=`«${snd.ex.en}» (${snd.ex.pron}) үгэнд <b>${a.L}</b> ямар авиа гаргаж байна вэ?`;
+    prompt=`<span class="ad-letter${a.vowel?' vow':''}">${a.L}</span> <button class="speak" style="width:38px;height:38px;font-size:17px;display:inline-grid;vertical-align:middle" onclick="speak(${JSON.stringify(snd.ex.en).replace(/"/g,'&quot;')}, this)">🔊</button>`;
+    answer='«'+snd.s+'»';
+    const pool=[]; ALPHA.forEach(x=>x.sounds.forEach(s=>{ if(!pool.includes(s.s)) pool.push(s.s); }));
+    const others=shuffle(pool.filter(s=>s!==snd.s)).slice(0,3).map(s=>'«'+s+'»');
+    options=shuffle([answer,...others]);
+  }
+  body.innerHTML=`<div class="quiz-progress">${prog}</div><div class="glass ex"><div class="q">${qlabel}</div><div class="sent" style="text-align:center">${prompt}</div><div class="opts" id="adOpts"></div></div>`;
+  const box=document.getElementById('adOpts');
+  options.forEach(o=>{ const b=document.createElement('button'); b.className='opt'; b.textContent=o; b.onclick=()=>alphaDrillAns(b,o,answer); box.appendChild(b); });
+  if(type==='listen') setTimeout(()=>speak(a.L),300);
+}
+function alphaOpts(a, get){
+  const others=shuffle(ALPHA.filter(x=>x.L!==a.L)).slice(0,3).map(get);
+  return shuffle([get(a),...others]);
+}
+function alphaDrillAns(btn,chosen,correct){
+  const btns=document.querySelectorAll('#adOpts .opt'); btns.forEach(b=>b.disabled=true);
+  if(chosen===correct){ btn.classList.add('correct'); aq.correct++; }
+  else{ btn.classList.add('wrong'); btns.forEach(b=>{ if(b.textContent===correct) b.classList.add('correct'); }); }
+  setTimeout(()=>{ aq.i++; alphaDrillStep(); }, 800);
+}
+function alphaDrillDone(){
+  const total=aq.order.length;
+  const xp=Math.max(4, Math.round(aq.correct/total*12));
+  document.getElementById('adBody').innerHTML=`<div class="glass done-card"><div class="big grad">${aq.correct}/${total}</div><p style="color:var(--mint);margin:8px 0 14px">+${xp} XP 🎉</p></div>`;
+  const d=document.querySelector('#adBody .done-card');
+  const again=document.createElement('button'); again.className='btn ghost'; again.style.marginRight='8px'; again.textContent='Дахин'; again.onclick=startAlphaDrill;
+  const back=document.createElement('button'); back.className='btn glow'; back.textContent='Цагаан толгой'; back.onclick=closeAlphaDrill;
+  d.appendChild(again); d.appendChild(back);
+  awardGameXp(xp);
+}
+function closeAlphaDrill(){ go('app'); setTab('alpha'); }
+
+// ============================================================
+//  ТОЛЬ БИЧИГ — товших үгийн тайлбар (VOCAB + дүрмийн үгс)
+// ============================================================
+
+// VOCAB + EXTRA_DICT-ээс нэгдсэн толь үүсгэх
+const DICT = {};
+(function buildDict(){
+  try{
+    VOCAB.forEach(p=>p.words.forEach(w=>{
+      const k=String(w.en||'').toLowerCase().trim();
+      if(k && !DICT[k]) DICT[k]={ pron:w.pron||'', mn:w.mn||'', ic:w.ic||'' };
+    }));
+  }catch(e){}
+  Object.keys(EXTRA_DICT).forEach(k=>{
+    if(!DICT[k]) DICT[k]={ pron:EXTRA_DICT[k][0], mn:EXTRA_DICT[k][1], ic:'' };
+  });
+})();
+
+// Үг хайх (энгийн хувирлыг тайлна)
+function lookupWord(raw){
+  const w=String(raw||'').toLowerCase().replace(/[^a-z']/g,'').replace(/^'+|'+$/g,'');
+  if(!w) return null;
+  if(DICT[w]) return { key:w, ...DICT[w] };
+  const tries=[];
+  if(w.endsWith("'s")) tries.push(w.slice(0,-2));
+  if(w.endsWith('ies')) tries.push(w.slice(0,-3)+'y');
+  if(w.endsWith('es')) tries.push(w.slice(0,-2));
+  if(w.endsWith('s')) tries.push(w.slice(0,-1));
+  if(w.endsWith('ied')) tries.push(w.slice(0,-3)+'y');
+  if(w.endsWith('ed')){ tries.push(w.slice(0,-2)); tries.push(w.slice(0,-1)); }
+  if(w.endsWith('ing')){ tries.push(w.slice(0,-3)); tries.push(w.slice(0,-3)+'e'); }
+  if(w.endsWith('ier')) tries.push(w.slice(0,-3)+'y');
+  if(w.endsWith('iest')) tries.push(w.slice(0,-4)+'y');
+  if(w.endsWith('er')) tries.push(w.slice(0,-2));
+  if(w.endsWith('est')) tries.push(w.slice(0,-3));
+  // давхар гийгүүлэгч: stopped→stop, running→run, fitter→fit
+  if(w.endsWith('ed')){ const b=w.slice(0,-2); if(b.length>2 && b[b.length-1]===b[b.length-2]) tries.push(b.slice(0,-1)); }
+  if(w.endsWith('er')){ const b=w.slice(0,-2); if(b.length>2 && b[b.length-1]===b[b.length-2]) tries.push(b.slice(0,-1)); }
+  if(w.endsWith('est')){ const b=w.slice(0,-3); if(b.length>2 && b[b.length-1]===b[b.length-2]) tries.push(b.slice(0,-1)); }
+  if(w.endsWith('ing')){ const b=w.slice(0,-3); if(b.length>2 && b[b.length-1]===b[b.length-2]) tries.push(b.slice(0,-1)); }
+  if(w.length>3 && w[w.length-1]===w[w.length-2]) tries.push(w.slice(0,-1));
+  for(const t of tries){ if(DICT[t]) return { key:t, ...DICT[t] }; }
+  return null;
+}
+
+// Англи текстийн үг бүрийг товшигдохоор боох
+function tapWords(text){
+  return String(text==null?'':text).replace(/([A-Za-z][A-Za-z']+)/g, '<span class="tw" data-w="$1">$1</span>');
+}
+
+// ---- Үгийн карт (popup) ----
+function openWordCard(raw){
+  const clean=String(raw||'').replace(/[^A-Za-z']/g,'');
+  if(!clean) return;
+  const d=lookupWord(clean);
+  const saved=(state.profile.my_words||[]).some(x=>x.en.toLowerCase()===clean.toLowerCase());
+  let ov=document.getElementById('wcOverlay');
+  if(!ov){ ov=document.createElement('div'); ov.id='wcOverlay'; ov.className='wc-overlay'; document.body.appendChild(ov); }
+  const esc=(t)=>JSON.stringify(String(t)).replace(/"/g,'&quot;');
+  ov.innerHTML=`<div class="glass wc-card" id="wcCard">
+      <div class="wc-word">${clean} <button class="speak" style="width:40px;height:40px;font-size:18px;display:inline-grid;vertical-align:middle" onclick="speak(${esc(clean)}, this)">🔊</button></div>
+      ${d?`<div class="wc-pron">«${d.pron}»</div><div class="wc-mn">${d.ic?d.ic+' ':''}${d.mn}</div>
+        ${d.key!==clean.toLowerCase()?`<div class="wc-base">үндсэн хэлбэр: <b>${d.key}</b></div>`:''}
+        <button class="btn glow full" id="wcAdd" ${saved?'disabled':''} onclick="addMyWord(${esc(clean)})">${saved?'✓ Үгийн санд байна':'➕ Үгийн санд нэмэх'}</button>`
+        :`<div class="wc-mn" style="color:var(--dim)">Толь бичигт олдсонгүй.</div>
+          <div class="wc-base">🔊 дарж дуудлагыг нь сонсоод, Ruby-гээс (Яриа таб) асууж болно.</div>`}
+      <button class="btn ghost full" style="margin-top:8px" onclick="closeWordCard()">Хаах</button>
+    </div>`;
+  ov.style.display='flex';
+  ov.onclick=(e)=>{ if(e.target===ov) closeWordCard(); };
+}
+function closeWordCard(){ const ov=document.getElementById('wcOverlay'); if(ov) ov.style.display='none'; }
+
+function addMyWord(raw){
+  const clean=String(raw||'').replace(/[^A-Za-z']/g,'');
+  const d=lookupWord(clean); if(!d) return;
+  const p=state.profile;
+  if(!Array.isArray(p.my_words)) p.my_words=[];
+  if(p.my_words.some(x=>x.en.toLowerCase()===clean.toLowerCase())){ closeWordCard(); return; }
+  p.my_words.push({ en:clean.toLowerCase(), pron:d.pron, mn:d.mn, ic:d.ic||'⭐' });
+  saveProfile();
+  const b=document.getElementById('wcAdd');
+  if(b){ b.textContent='✓ Нэмэгдлээ!'; b.disabled=true; }
+  setTimeout(closeWordCard, 700);
+}
+function removeMyWord(en){
+  const p=state.profile;
+  p.my_words=(p.my_words||[]).filter(x=>x.en!==en);
+  saveProfile(); renderVocabList();
+}
+function myWordsPack(){
+  return { id:'mywords', title:'⭐ Миний үгс', level:'A1', icon:'⭐', words:(state.profile.my_words||[]) };
+}
+
+// товшилтыг барих (delegation)
+document.addEventListener('click', function(e){
+  const t=e.target;
+  if(t && t.classList && t.classList.contains('tw')){ openWordCard(t.dataset.w); }
+});
+
+// ============================================================
+//  A1 ДАСГАЛ АЖИЛ
+// ============================================================
+let pq=null;
+
+function buildPracticeQs(n){
+  const les=COURSES.a1||[]; const qs=[];
+  const allPhrases=[]; les.forEach(l=>(l.phrases||[]).forEach(ph=>allPhrases.push(ph)));
+  const allEx=[]; les.forEach(l=>(l.exercises||[]).forEach(ex=>allEx.push({ ...ex, from:l.title })));
+  for(let k=0;k<n;k++){
+    const r=Math.random();
+    if(r<0.5 && allEx.length){
+      const ex=allEx[Math.floor(Math.random()*allEx.length)];
+      qs.push({ type:'gap', ...ex });
+    } else if(allPhrases.length>=4){
+      const ph=allPhrases[Math.floor(Math.random()*allPhrases.length)];
+      const others=shuffle(allPhrases.filter(x=>x.mn!==ph.mn)).slice(0,3).map(x=>x.mn);
+      qs.push({ type:(r<0.8?'phrase':'listen'), en:ph.en, pron:ph.pron, mn:ph.mn, opts:shuffle([ph.mn,...others]) });
+    } else k--;
+  }
+  return qs;
+}
+
+function startPractice(){
+  if(!isPro() && !demoMode){ goPro(); return; }
+  pq={ i:0, correct:0, qs:buildPracticeQs(10) };
+  document.getElementById('prTitle').textContent='🎯 A1 дасгал';
+  go('practice'); window.scrollTo(0,0); practiceStep();
+}
+function closePractice(){ go('app'); setTab('lessons'); }
+
+function practiceStep(){
+  const total=pq.qs.length;
+  if(pq.i>=total){ practiceDone(); return; }
+  const q=pq.qs[pq.i];
+  const body=document.getElementById('prBody');
+  const esc=(t)=>JSON.stringify(String(t)).replace(/"/g,'&quot;');
+  let qlabel, sent, opts, answer;
+  if(q.type==='gap'){
+    qlabel=q.q; answer=q.opts[q.a]; opts=q.opts.slice();
+    sent=tapWords(q.parts[0]||'')+'<b class="gap">___</b>'+tapWords(q.parts[1]||'');
+  } else if(q.type==='listen'){
+    qlabel='Сонсоод орчуулгыг нь сонго:'; answer=q.mn; opts=q.opts.slice();
+    sent=`<button class="speak" style="width:58px;height:58px;font-size:26px" onclick="speak(${esc(q.en)}, this)">🔊</button>`;
+  } else {
+    qlabel='Орчуулга нь аль вэ:'; answer=q.mn; opts=q.opts.slice();
+    sent=tapWords(q.en)+` <button class="speak" style="width:34px;height:34px;font-size:15px;display:inline-grid;vertical-align:middle" onclick="speak(${esc(q.en)}, this)">🔊</button>`;
+  }
+  body.innerHTML=`<div class="quiz-progress">${pq.i+1} / ${total}</div>
+    <div class="glass ex"><div class="q">${qlabel}</div><div class="sent">${sent}</div>
+    <div class="opts" id="prOpts"></div><div class="exfix" id="prFix"></div></div>
+    <p class="pron-note">💡 Мэдэхгүй үг дээрээ товшиж тайлбарыг нь хараарай</p>`;
+  const box=document.getElementById('prOpts');
+  opts.forEach(o=>{ const b=document.createElement('button'); b.className='opt'; b.textContent=o; b.onclick=()=>practiceAns(b,o,answer,q); box.appendChild(b); });
+}
+function practiceAns(btn,chosen,correct,q){
+  const btns=document.querySelectorAll('#prOpts .opt'); btns.forEach(b=>b.disabled=true);
+  if(chosen===correct){ btn.classList.add('correct'); pq.correct++; }
+  else{
+    btn.classList.add('wrong');
+    btns.forEach(b=>{ if(b.textContent===correct) b.classList.add('correct'); });
+    const f=document.getElementById('prFix');
+    if(f && q.fix){ f.textContent='💡 '+q.fix; f.style.display='block'; }
+  }
+  setTimeout(()=>{ pq.i++; practiceStep(); }, chosen===correct?700:1900);
+}
+function practiceDone(){
+  const total=pq.qs.length;
+  const xp=Math.max(5, Math.round(pq.correct/total*15));
+  document.getElementById('prBody').innerHTML=`<div class="glass done-card"><div class="big grad">${pq.correct}/${total}</div><p style="color:var(--mint);margin:8px 0 14px">+${xp} XP 🎉</p></div>`;
+  const d=document.querySelector('#prBody .done-card');
+  const again=document.createElement('button'); again.className='btn ghost'; again.style.marginRight='8px'; again.textContent='Дахин'; again.onclick=startPractice;
+  const back=document.createElement('button'); back.className='btn glow'; back.textContent='Хичээл'; back.onclick=closePractice;
+  d.appendChild(again); d.appendChild(back);
+  awardGameXp(xp);
+}
+
+// ---- session restore ----
+(async function init(){ if(demoMode) return; try{ const { data:{ session } } = await sb.auth.getSession(); if(session) await afterLogin(); }catch(e){} })();
+</script>
+</body>
+</html>
